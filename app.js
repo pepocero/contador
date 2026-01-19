@@ -529,6 +529,35 @@ function init() {
     setViewMode(event.target.value);
   });
 
+  const installButton = document.getElementById('install-app');
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    installButton.hidden = false;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    installButton.hidden = true;
+  });
+
+  installButton.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+      alert('La instalación no está disponible en este navegador. Si usas iOS, abre en Safari y elige "Añadir a pantalla de inicio".');
+      return;
+    }
+    deferredPrompt.prompt();
+    try {
+      await deferredPrompt.userChoice;
+    } catch (error) {
+      console.error('Error en la instalación:', error);
+    }
+    deferredPrompt = null;
+    installButton.hidden = true;
+  });
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch((error) => {

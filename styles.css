@@ -157,6 +157,10 @@ body {
   color: var(--primary-dark);
 }
 
+.btn--secondary[hidden] {
+  display: none;
+}
+
 .btn--ghost {
   background: transparent;
   color: var(--danger);
