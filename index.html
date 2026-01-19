@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sistema ligero de contadores de días sin incidentes." />
+    <meta name="theme-color" content="#0d1b2a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.svg" />
+    <title>Contadores sin incidentes</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <div>
+          <h1>Contadores sin incidentes</h1>
+          <p class="app__subtitle">
+            Crea y gestiona contadores de tiempo transcurrido desde una fecha y hora.
+          </p>
+        </div>
+        <div class="app__controls">
+          <label class="app__control">
+            <span>Vista</span>
+            <select id="view-mode" aria-label="Seleccionar vista">
+              <option value="flip">Flip Clock</option>
+              <option value="calculator">Calculadora</option>
+              <option value="bolder">Bolder</option>
+            </select>
+          </label>
+          <button id="reset-all" class="btn btn--danger" type="button">
+            Resetear todo
+          </button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h2>Nuevo contador</h2>
+        <form id="counter-form" class="form">
+          <label class="form__field">
+            <span>Nombre</span>
+            <input
+              id="counter-name"
+              type="text"
+              name="name"
+              placeholder="Ej: Días sin accidentes"
+              maxlength="60"
+              required
+            />
+          </label>
+          <label class="form__field">
+            <span>Fecha y hora de inicio</span>
+            <input id="counter-start" type="datetime-local" name="start" required />
+          </label>
+          <button class="btn btn--primary" type="submit">Crear contador</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Mis contadores</h2>
+        <div id="counter-list" class="counter-list" aria-live="polite"></div>
+        <p id="empty-state" class="empty-state">
+          Aún no hay contadores. Crea el primero para empezar.
+        </p>
+      </section>
+    </main>
+
+    <template id="counter-template">
+      <article class="counter">
+        <div class="counter__main">
+          <h3 class="counter__title"></h3>
+          <div class="counter__time"></div>
+        </div>
+        <div class="counter__actions">
+          <button class="btn btn--secondary" data-action="reset" type="button">
+            Reiniciar
+          </button>
+          <button class="btn btn--ghost" data-action="delete" type="button">
+            Eliminar
+          </button>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
