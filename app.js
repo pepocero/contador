@@ -560,9 +560,42 @@ function init() {
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch((error) => {
-        console.error('Error al registrar el Service Worker:', error);
-      });
+      navigator.serviceWorker
+        .register('./sw.js')
+        .then((registration) => {
+          const promptUpdate = () => {
+            if (!registration.waiting) {
+              return;
+            }
+            const accept = confirm('Hay una nueva versión disponible. ¿Quieres actualizar ahora?');
+            if (accept) {
+              registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+          };
+
+          if (registration.waiting) {
+            promptUpdate();
+          }
+
+          registration.addEventListener('updatefound', () => {
+            const installing = registration.installing;
+            if (!installing) {
+              return;
+            }
+            installing.addEventListener('statechange', () => {
+              if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                promptUpdate();
+              }
+            });
+          });
+
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+          });
+        })
+        .catch((error) => {
+          console.error('Error al registrar el Service Worker:', error);
+        });
     });
   }
   
