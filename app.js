@@ -288,7 +288,15 @@ function createCounterElement(counter) {
   counterEl.setAttribute('data-id', counter.id);
   
   const titleEl = clone.querySelector('.counter__title');
-  titleEl.textContent = counter.name;
+  const startDate = new Date(counter.startDate);
+  const formattedDate = startDate.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  titleEl.textContent = `${counter.name} (${formattedDate})`;
   
   const timeEl = clone.querySelector('.counter__time');
   timeEl.setAttribute('data-start', counter.startDate);
