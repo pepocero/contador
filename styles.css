@@ -327,8 +327,7 @@ body {
   border-radius: 14px;
   border: 1px solid var(--border);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: 16px;
   background: #fff;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
@@ -345,18 +344,39 @@ body {
 }
 
 .counter__main {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .counter__time {
   margin-top: 12px;
 }
 
+@media (min-width: 769px) {
+  .counter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .counter__main {
+    width: 100%;
+  }
+  
+  .counter__actions {
+    width: 100%;
+    margin-top: 4px;
+  }
+}
+
 @media (max-width: 768px) {
   .counter {
     padding: 14px;
     gap: 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .counter__main {
+    width: 100%;
   }
   
   .counter__title {
@@ -367,12 +387,23 @@ body {
   .counter__time {
     margin-top: 8px;
   }
+  
+  .counter__actions {
+    width: 100%;
+    margin-top: 4px;
+  }
 }
 
 @media (max-width: 480px) {
   .counter {
     padding: 12px;
     gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .counter__main {
+    width: 100%;
   }
   
   .counter__title {
@@ -383,16 +414,28 @@ body {
   .counter__time {
     margin-top: 6px;
   }
+  
+  .counter__actions {
+    width: 100%;
+    margin-top: 4px;
+  }
 }
 
 @media (max-width: 768px) and (orientation: landscape) {
   .counter {
+    flex-direction: row;
     padding: 10px 12px;
-    align-items: flex-start;
+    align-items: center;
   }
   
   .counter__main {
-    flex: 0 1 auto;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .counter__actions {
+    flex-shrink: 0;
+    width: auto;
   }
 }
 
@@ -690,11 +733,20 @@ body.view-bolder .flip-card__top .flip-card__digit {
 
   .counter {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  .counter__main {
+    width: 100%;
   }
 
   .counter__actions {
     width: 100%;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-top: 4px;
   }
 
   .flip-grid {
@@ -707,11 +759,18 @@ body.view-bolder .flip-card__top .flip-card__digit {
   .counter {
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+  }
+  
+  .counter__main {
+    flex: 1;
+    min-width: 0;
   }
   
   .counter__actions {
     width: auto;
     flex-shrink: 0;
+    margin-top: 0;
   }
 }
 
@@ -794,16 +853,19 @@ body.view-bolder .flip-card__top .flip-card__digit {
   .counter {
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     padding: 8px 10px;
   }
   
   .counter__main {
-    flex: 0 1 auto;
+    flex: 1;
+    min-width: 0;
   }
   
   .counter__actions {
     width: auto;
     flex-shrink: 0;
+    margin-top: 0;
   }
   
   .counter__time {

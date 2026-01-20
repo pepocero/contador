@@ -419,7 +419,7 @@ function createCounter(name, startDate) {
  * @param {string} counterId - ID del contador a reiniciar
  */
 function resetCounter(counterId) {
-  if (!confirm('¿Estás seguro de que quieres reiniciar este contador? Se establecerá la fecha y hora actual como nuevo inicio.')) {
+  if (!confirm('¿Estás seguro de que quieres reiniciar este contador?\n\nSe establecerá la fecha y hora actual como nuevo inicio.\n\n⚠️ Esta acción es IRREVERSIBLE. El tiempo transcurrido anterior se perderá permanentemente.')) {
     return;
   }
   
@@ -446,7 +446,7 @@ function resetCounter(counterId) {
  * @param {string} counterId - ID del contador a eliminar
  */
 function deleteCounter(counterId) {
-  if (!confirm('¿Estás seguro de que quieres eliminar este contador?')) {
+  if (!confirm('¿Estás seguro de que quieres eliminar este contador?\n\n⚠️ Esta acción es IRREVERSIBLE. El contador y todos sus datos se perderán permanentemente y no podrán recuperarse.')) {
     return;
   }
   
