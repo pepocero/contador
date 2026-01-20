@@ -1,5 +1,5 @@
-// VERSION: 20250102120000
-const CACHE_NAME = 'contador-pwa-20250102120000';
+// VERSION: 20260120211401
+const CACHE_NAME = 'contador-pwa-20260120211401';
 const STATIC_ASSETS = [
   './',
   './index.html',
