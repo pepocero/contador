@@ -559,9 +559,22 @@ function init() {
   });
 
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
+      // Leer versión del service worker para cache-busting
+      let swVersion = '?v=' + Date.now();
+      try {
+        const swResponse = await fetch('./sw.js?nocache=' + Date.now());
+        const swText = await swResponse.text();
+        const versionMatch = swText.match(/VERSION:\s*(\d+)/);
+        if (versionMatch) {
+          swVersion = '?v=' + versionMatch[1];
+        }
+      } catch (error) {
+        console.warn('No se pudo leer la versión del SW:', error);
+      }
+      
       navigator.serviceWorker
-        .register('./sw.js')
+        .register('./sw.js' + swVersion, { updateViaCache: 'none' })
         .then((registration) => {
           const promptUpdate = () => {
             if (!registration.waiting) {
@@ -573,6 +586,16 @@ function init() {
             }
           };
 
+          // Verificar actualizaciones periódicamente (cada 60 segundos)
+          setInterval(() => {
+            registration.update();
+          }, 60000);
+
+          // Verificar actualizaciones al recuperar el foco
+          window.addEventListener('focus', () => {
+            registration.update();
+          });
+
           if (registration.waiting) {
             promptUpdate();
           }
@@ -583,8 +606,14 @@ function init() {
               return;
             }
             installing.addEventListener('statechange', () => {
-              if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-                promptUpdate();
+              if (installing.state === 'installed') {
+                if (navigator.serviceWorker.controller) {
+                  // Hay una nueva versión esperando
+                  promptUpdate();
+                } else {
+                  // Primera instalación
+                  console.log('Service Worker instalado por primera vez');
+                }
               }
             });
           });
@@ -594,7 +623,10 @@ function init() {
           });
         })
         .catch((error) => {
-          console.error('Error al registrar el Service Worker:', error);
+          // Solo mostrar error si no es por protocolo file://
+          if (window.location.protocol !== 'file:') {
+            console.error('Error al registrar el Service Worker:', error);
+          }
         });
     });
   }
