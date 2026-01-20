@@ -881,15 +881,31 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 0;
+  position: relative;
 }
 
 .flip-label {
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
   font-weight: 700;
-  color: var(--muted);
+  color: #000000;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 12px 12px 0 0;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid #ffffff;
+  border-bottom: 2px solid var(--flip-border);
+  margin-bottom: -2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 
 @media (max-width: 768px) {
   .flip-grid {
@@ -897,8 +913,13 @@ body.modal-open {
   }
   
   .flip-label {
-    font-size: 0.7rem;
-    gap: 6px;
+    font-size: 0.65rem;
+    padding: 5px 10px;
+    letter-spacing: 0.1em;
+  }
+  
+  .flip-unit {
+    gap: 0;
   }
 }
 
@@ -951,8 +972,13 @@ body.modal-open {
   }
   
   .flip-label {
-    font-size: 0.6rem;
-    gap: 4px;
+    font-size: 0.55rem;
+    padding: 4px 8px;
+    letter-spacing: 0.08em;
+  }
+  
+  .flip-unit {
+    gap: 0;
   }
   
   body.view-calculator .flip-card__top,
@@ -975,8 +1001,9 @@ body.modal-open {
   width: 100%;
   height: clamp(110px, 15vw, 150px);
   perspective: 900px;
-  border-radius: 16px;
+  border-radius: 0 0 16px 16px;
   box-shadow: var(--flip-shadow);
+  margin-top: 0;
 }
 
 .flip-card__top,
@@ -1042,7 +1069,7 @@ body.view-calculator .flip-card__flip-bottom {
 
 body.view-calculator .flip-card__top {
   height: 100%;
-  border-radius: 14px;
+  border-radius: 0 0 14px 14px;
 }
 
 body.view-calculator .flip-card__bottom,
@@ -1076,7 +1103,7 @@ body.view-bolder .flip-card::before {
 
 body.view-bolder .flip-card__top {
   height: 100%;
-  border-radius: 14px;
+  border-radius: 0 0 14px 14px;
 }
 
 body.view-bolder .flip-card__bottom,
@@ -1360,8 +1387,13 @@ body.view-bolder .flip-card__top .flip-card__digit {
   }
   
   .flip-label {
-    font-size: 0.55rem;
-    gap: 3px;
+    font-size: 0.5rem;
+    padding: 3px 6px;
+    letter-spacing: 0.06em;
+  }
+  
+  .flip-unit {
+    gap: 0;
   }
   
   body.view-calculator .flip-card__top,
