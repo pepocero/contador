@@ -27,6 +27,20 @@ function loadCounters() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       counters = JSON.parse(stored);
+      // Migrar contadores antiguos a la nueva estructura
+      counters = counters.map(counter => {
+        if (!counter.resetHistory) {
+          counter.resetHistory = [];
+        }
+        if (!counter.originalStartDate) {
+          counter.originalStartDate = counter.startDate;
+        }
+        if (!counter.createdAt) {
+          counter.createdAt = new Date().toISOString();
+        }
+        return counter;
+      });
+      saveCounters(); // Guardar estructura migrada
     } else {
       counters = [];
     }
@@ -46,6 +60,306 @@ function saveCounters() {
     console.error('Error al guardar contadores:', error);
     alert('Error al guardar los datos. Verifica que el almacenamiento local esté disponible.');
   }
+}
+
+/**
+ * Exporta los contadores a un archivo JSON
+ */
+function exportCounters() {
+  try {
+    const dataStr = JSON.stringify(counters, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `contadores-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error al exportar contadores:', error);
+    alert('Error al exportar los datos. Por favor, inténtalo de nuevo.');
+  }
+}
+
+/**
+ * Importa contadores desde un archivo JSON
+ */
+function importCounters(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) {
+        alert('El archivo no tiene un formato válido. Debe ser un array de contadores.');
+        return;
+      }
+      
+      if (!confirm(`Se importarán ${imported.length} contador(es). ¿Deseas reemplazar los contadores existentes o agregarlos?`)) {
+        return;
+      }
+      
+      const replace = confirm('¿Reemplazar contadores existentes? (Sí = reemplazar, No = agregar)');
+      
+      if (replace) {
+        counters = imported.map(counter => {
+          // Asegurar estructura completa
+          if (!counter.resetHistory) counter.resetHistory = [];
+          if (!counter.originalStartDate) counter.originalStartDate = counter.startDate;
+          if (!counter.createdAt) counter.createdAt = new Date().toISOString();
+          return counter;
+        });
+      } else {
+        // Agregar nuevos contadores con IDs únicos
+        imported.forEach(counter => {
+          counter.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+          if (!counter.resetHistory) counter.resetHistory = [];
+          if (!counter.originalStartDate) counter.originalStartDate = counter.startDate;
+          if (!counter.createdAt) counter.createdAt = new Date().toISOString();
+          counters.push(counter);
+        });
+      }
+      
+      saveCounters();
+      renderCounters();
+      renderStatistics();
+      alert(`Contadores importados exitosamente. Total: ${counters.length}`);
+    } catch (error) {
+      console.error('Error al importar contadores:', error);
+      alert('Error al importar los datos. Verifica que el archivo sea válido.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/**
+ * Calcula las estadísticas de todos los contadores
+ */
+function calculateStatistics() {
+  if (counters.length === 0) {
+    return null;
+  }
+  
+  const stats = {
+    totalCounters: counters.length,
+    totalResets: 0,
+    counters: []
+  };
+  
+  counters.forEach(counter => {
+    const resetCount = counter.resetHistory ? counter.resetHistory.length : 0;
+    stats.totalResets += resetCount;
+    
+    // Calcular duración actual
+    const currentStart = new Date(counter.startDate);
+    const now = new Date();
+    const currentDuration = now - currentStart;
+    
+    // Calcular duración máxima histórica
+    let maxDuration = currentDuration;
+    let maxDurationPeriod = {
+      startDate: counter.startDate,
+      endDate: now.toISOString(),
+      duration: currentDuration
+    };
+    
+    if (counter.resetHistory && counter.resetHistory.length > 0) {
+      counter.resetHistory.forEach(period => {
+        if (period.duration > maxDuration) {
+          maxDuration = period.duration;
+          maxDurationPeriod = period;
+        }
+      });
+    }
+    
+    // Calcular duración promedio
+    let totalDuration = currentDuration;
+    let periodCount = 1;
+    if (counter.resetHistory && counter.resetHistory.length > 0) {
+      counter.resetHistory.forEach(period => {
+        totalDuration += period.duration;
+        periodCount++;
+      });
+    }
+    const avgDuration = totalDuration / periodCount;
+    
+    stats.counters.push({
+      id: counter.id,
+      name: counter.name,
+      resetCount: resetCount,
+      currentDuration: currentDuration,
+      maxDuration: maxDuration,
+      maxDurationPeriod: maxDurationPeriod,
+      avgDuration: avgDuration,
+      createdAt: counter.createdAt || counter.originalStartDate,
+      originalStartDate: counter.originalStartDate || counter.startDate
+    });
+  });
+  
+  // Ordenar por duración máxima
+  stats.counters.sort((a, b) => b.maxDuration - a.maxDuration);
+  
+  return stats;
+}
+
+/**
+ * Formatea una duración en milisegundos a un string legible
+ */
+function formatDuration(ms) {
+  if (ms < 0) return '0';
+  
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+  
+  if (years > 0) {
+    return `${years} año${years !== 1 ? 's' : ''} ${months % 12} mes${(months % 12) !== 1 ? 'es' : ''}`;
+  } else if (months > 0) {
+    return `${months} mes${months !== 1 ? 'es' : ''} ${days % 30} día${(days % 30) !== 1 ? 's' : ''}`;
+  } else if (days > 0) {
+    return `${days} día${days !== 1 ? 's' : ''} ${hours % 24}h ${minutes % 60}m`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${seconds % 60}s`;
+  } else {
+    return `${seconds}s`;
+  }
+}
+
+/**
+ * Renderiza las estadísticas
+ */
+function renderStatistics() {
+  const statsContainer = document.getElementById('stats-content');
+  if (!statsContainer) return;
+  
+  const stats = calculateStatistics();
+  
+  if (!stats) {
+    statsContainer.innerHTML = '<p class="empty-state">No hay contadores para mostrar estadísticas.</p>';
+    return;
+  }
+  
+  let html = `
+    <div class="stats-summary">
+      <div class="stat-card">
+        <div class="stat-card__value">${stats.totalCounters}</div>
+        <div class="stat-card__label">Total Contadores</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__value">${stats.totalResets}</div>
+        <div class="stat-card__label">Total Reinicios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__value">${(stats.totalResets / stats.totalCounters).toFixed(1)}</div>
+        <div class="stat-card__label">Promedio Reinicios</div>
+      </div>
+    </div>
+    
+    <div class="stats-section">
+      <h3>Contador con Mayor Duración</h3>
+      <div class="stat-highlight">
+        <div class="stat-highlight__name">${stats.counters[0].name}</div>
+        <div class="stat-highlight__value">${formatDuration(stats.counters[0].maxDuration)}</div>
+        <div class="stat-highlight__meta">${stats.counters[0].resetCount} reinicio${stats.counters[0].resetCount !== 1 ? 's' : ''}</div>
+      </div>
+    </div>
+    
+    <div class="stats-section">
+      <h3>Estadísticas por Contador</h3>
+      <div class="stats-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Contador</th>
+              <th>Reinicios</th>
+              <th>Duración Actual</th>
+              <th>Duración Máxima</th>
+              <th>Duración Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+  `;
+  
+  stats.counters.forEach(counter => {
+    html += `
+      <tr>
+        <td><strong>${counter.name}</strong></td>
+        <td>${counter.resetCount}</td>
+        <td>${formatDuration(counter.currentDuration)}</td>
+        <td>${formatDuration(counter.maxDuration)}</td>
+        <td>${formatDuration(counter.avgDuration)}</td>
+      </tr>
+    `;
+  });
+  
+  html += `
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="stats-section">
+      <h3>Gráfico de Reinicios</h3>
+      <div class="chart-container">
+        <div class="chart-bars">
+  `;
+  
+  // Gráfico de barras de reinicios
+  const maxResets = Math.max(...stats.counters.map(c => c.resetCount), 1);
+  stats.counters.forEach(counter => {
+    const percentage = maxResets > 0 ? (counter.resetCount / maxResets) * 100 : 0;
+    html += `
+      <div class="chart-bar-item">
+        <div class="chart-bar-label">${counter.name}</div>
+        <div class="chart-bar-wrapper">
+          <div class="chart-bar" style="width: ${percentage}%">
+            <span class="chart-bar-value">${counter.resetCount}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += `
+        </div>
+      </div>
+    </div>
+    
+    <div class="stats-section">
+      <h3>Gráfico de Duración Máxima</h3>
+      <div class="chart-container">
+        <div class="chart-bars">
+  `;
+  
+  // Gráfico de barras de duración máxima
+  const maxDuration = Math.max(...stats.counters.map(c => c.maxDuration), 1);
+  stats.counters.forEach(counter => {
+    const percentage = (counter.maxDuration / maxDuration) * 100;
+    html += `
+      <div class="chart-bar-item">
+        <div class="chart-bar-label">${counter.name}</div>
+        <div class="chart-bar-wrapper">
+          <div class="chart-bar chart-bar--duration" style="width: ${percentage}%">
+            <span class="chart-bar-value">${formatDuration(counter.maxDuration)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += `
+        </div>
+      </div>
+    </div>
+  `;
+  
+  statsContainer.innerHTML = html;
 }
 
 function setViewMode(mode) {
@@ -303,8 +617,15 @@ function createCounterElement(counter) {
   buildFlipClock(timeEl);
   
   // Botones de acción
+  const editBtn = clone.querySelector('[data-action="edit"]');
   const resetBtn = clone.querySelector('[data-action="reset"]');
   const deleteBtn = clone.querySelector('[data-action="delete"]');
+  
+  editBtn.addEventListener('click', () => editCounter(counter.id));
+  editBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    editCounter(counter.id);
+  });
   
   resetBtn.addEventListener('click', () => resetCounter(counter.id));
   resetBtn.addEventListener('touchend', (e) => {
@@ -364,6 +685,9 @@ function renderCounters() {
   
   // Actualizar todos los contadores inmediatamente
   updateAllCounters();
+  
+  // Actualizar estadísticas
+  renderStatistics();
 }
 
 /**
@@ -409,12 +733,16 @@ function createCounter(name, startDate) {
   const newCounter = {
     id: Date.now().toString(),
     name: name.trim(),
-    startDate: startDate
+    startDate: startDate,
+    createdAt: new Date().toISOString(),
+    resetHistory: [],
+    originalStartDate: startDate
   };
   
   counters.push(newCounter);
   saveCounters();
   renderCounters();
+  renderStatistics();
   
   // Asegurar que el temporizador esté corriendo
   if (counters.length > 0) {
@@ -436,6 +764,30 @@ function resetCounter(counterId) {
     return;
   }
   
+  // Guardar el historial antes de reiniciar
+  const previousStartDate = counter.startDate;
+  const resetDate = new Date();
+  const previousEndDate = resetDate.toISOString();
+  
+  // Calcular la duración del período anterior
+  const previousStart = new Date(previousStartDate);
+  const duration = resetDate - previousStart;
+  
+  // Agregar al historial de reinicios
+  if (!counter.resetHistory) {
+    counter.resetHistory = [];
+  }
+  if (!counter.originalStartDate) {
+    counter.originalStartDate = previousStartDate;
+  }
+  
+  counter.resetHistory.push({
+    startDate: previousStartDate,
+    endDate: previousEndDate,
+    duration: duration,
+    resetAt: previousEndDate
+  });
+  
   // Establecer fecha/hora actual como nuevo inicio
   const now = new Date();
   const year = now.getFullYear();
@@ -447,6 +799,7 @@ function resetCounter(counterId) {
   counter.startDate = `${year}-${month}-${day}T${hours}:${minutes}`;
   saveCounters();
   renderCounters();
+  renderStatistics();
 }
 
 /**
@@ -461,6 +814,7 @@ function deleteCounter(counterId) {
   counters = counters.filter(c => c.id !== counterId);
   saveCounters();
   renderCounters();
+  renderStatistics();
   
   // Si no hay contadores, detener el temporizador
   if (counters.length === 0) {
@@ -480,6 +834,7 @@ function resetAll() {
   localStorage.removeItem(STORAGE_KEY);
   stopUpdateTimer();
   renderCounters();
+  renderStatistics();
 }
 
 /**
@@ -501,10 +856,128 @@ function handleFormSubmit(event) {
   
   createCounter(name, startDate);
   
-  // Limpiar formulario
+  // Limpiar formulario y restablecer fecha por defecto
   nameInput.value = '';
-  startInput.value = '';
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  startInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
   nameInput.focus();
+}
+
+/**
+ * Funciones de Sidebar
+ */
+function openSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.add('sidebar--open');
+  overlay.classList.add('sidebar-overlay--visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('sidebar--open');
+  overlay.classList.remove('sidebar-overlay--visible');
+  document.body.style.overflow = '';
+}
+
+/**
+ * Funciones de Modales
+ */
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('modal--open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('modal--open');
+    document.body.style.overflow = '';
+  }
+}
+
+function closeAllModals() {
+  closeModal('modal-new');
+  closeModal('modal-edit');
+}
+
+/**
+ * Navegación entre páginas
+ */
+function showPage(pageId) {
+  // Ocultar todas las páginas
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('page--active');
+  });
+  
+  // Mostrar la página seleccionada
+  const page = document.getElementById(pageId);
+  if (page) {
+    page.classList.add('page--active');
+  }
+  
+  // Actualizar estado del sidebar
+  document.querySelectorAll('.sidebar__item').forEach(item => {
+    item.classList.remove('sidebar__item--active');
+  });
+  
+  if (pageId === 'page-counters') {
+    document.getElementById('menu-counters')?.classList.add('sidebar__item--active');
+  } else if (pageId === 'page-stats') {
+    document.getElementById('menu-stats')?.classList.add('sidebar__item--active');
+    renderStatistics();
+  }
+  
+  closeSidebar();
+}
+
+/**
+ * Editar contador
+ */
+function editCounter(counterId) {
+  const counter = counters.find(c => c.id === counterId);
+  if (!counter) return;
+  
+  // Llenar el formulario de edición
+  document.getElementById('edit-counter-id').value = counter.id;
+  document.getElementById('edit-counter-name').value = counter.name;
+  
+  // Formatear fecha para el input datetime-local
+  const startDate = new Date(counter.startDate);
+  const year = startDate.getFullYear();
+  const month = String(startDate.getMonth() + 1).padStart(2, '0');
+  const day = String(startDate.getDate()).padStart(2, '0');
+  const hours = String(startDate.getHours()).padStart(2, '0');
+  const minutes = String(startDate.getMinutes()).padStart(2, '0');
+  document.getElementById('edit-counter-start').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+  
+  openModal('modal-edit');
+}
+
+/**
+ * Guardar cambios de edición
+ */
+function saveEditCounter(counterId, name, startDate) {
+  const counter = counters.find(c => c.id === counterId);
+  if (!counter) return;
+  
+  counter.name = name.trim();
+  counter.startDate = startDate;
+  
+  saveCounters();
+  renderCounters();
+  renderStatistics();
+  closeModal('modal-edit');
 }
 
 /**
@@ -517,27 +990,148 @@ function init() {
   // Renderizar contadores
   renderCounters();
   
-  // Configurar formulario
-  const form = document.getElementById('counter-form');
-  form.addEventListener('submit', handleFormSubmit);
+  // Configurar Sidebar
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebarClose = document.getElementById('sidebar-close');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
   
-  // Configurar botón de resetear todo
-  const resetAllBtn = document.getElementById('reset-all');
-  resetAllBtn.addEventListener('click', resetAll);
+  sidebarToggle.addEventListener('click', openSidebar);
+  sidebarToggle.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    openSidebar();
+  });
+  
+  sidebarClose.addEventListener('click', closeSidebar);
+  sidebarClose.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    closeSidebar();
+  });
+  
+  sidebarOverlay.addEventListener('click', closeSidebar);
+  sidebarOverlay.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    closeSidebar();
+  });
+  
+  // Configurar navegación del sidebar
+  document.getElementById('menu-counters').addEventListener('click', () => showPage('page-counters'));
+  document.getElementById('menu-counters').addEventListener('touchend', (e) => {
+    e.preventDefault();
+    showPage('page-counters');
+  });
+  
+  document.getElementById('menu-stats').addEventListener('click', () => showPage('page-stats'));
+  document.getElementById('menu-stats').addEventListener('touchend', (e) => {
+    e.preventDefault();
+    showPage('page-stats');
+  });
+  
+  document.getElementById('menu-new').addEventListener('click', () => {
+    openModal('modal-new');
+    closeSidebar();
+  });
+  document.getElementById('menu-new').addEventListener('touchend', (e) => {
+    e.preventDefault();
+    openModal('modal-new');
+    closeSidebar();
+  });
+  
+  // Botón volver desde estadísticas
+  document.getElementById('back-to-counters').addEventListener('click', () => showPage('page-counters'));
+  document.getElementById('back-to-counters').addEventListener('touchend', (e) => {
+    e.preventDefault();
+    showPage('page-counters');
+  });
+  
+  // Configurar formulario de nuevo contador
+  const form = document.getElementById('counter-form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleFormSubmit(e);
+    closeModal('modal-new');
+  });
+  
+  // Configurar formulario de editar contador
+  const editForm = document.getElementById('edit-counter-form');
+  editForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const counterId = document.getElementById('edit-counter-id').value;
+    const name = document.getElementById('edit-counter-name').value;
+    const startDate = document.getElementById('edit-counter-start').value;
+    saveEditCounter(counterId, name, startDate);
+  });
+  
+  // Cerrar modales
+  document.querySelectorAll('.modal__close, .modal__cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.closest('#modal-new')) {
+        closeModal('modal-new');
+      } else if (btn.closest('#modal-edit')) {
+        closeModal('modal-edit');
+      }
+    });
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (btn.closest('#modal-new')) {
+        closeModal('modal-new');
+      } else if (btn.closest('#modal-edit')) {
+        closeModal('modal-edit');
+      }
+    });
+  });
+  
+  // Cerrar modal al hacer clic en overlay
+  document.querySelectorAll('.modal__overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeAllModals();
+      }
+    });
+  });
+  
+  // Configurar botones del sidebar
+  document.getElementById('menu-export').addEventListener('click', () => {
+    exportCounters();
+    closeSidebar();
+  });
+  document.getElementById('menu-export').addEventListener('touchend', (e) => {
+    e.preventDefault();
+    exportCounters();
+    closeSidebar();
+  });
+  
+  const importFile = document.getElementById('import-file');
+  importFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      importCounters(file);
+      e.target.value = '';
+      closeSidebar();
+    }
+  });
+  
+  const resetAllBtn = document.getElementById('menu-reset-all');
+  resetAllBtn.addEventListener('click', () => {
+    resetAll();
+    closeSidebar();
+  });
   resetAllBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
     resetAll();
+    closeSidebar();
   });
 
+  // Configurar selector de vista en sidebar
   const viewModeSelect = document.getElementById('view-mode');
-  const currentViewMode = 'flip';
-  viewModeSelect.value = currentViewMode;
-  setViewMode(currentViewMode);
+  const savedViewMode = localStorage.getItem(VIEW_MODE_KEY) || 'flip';
+  viewModeSelect.value = savedViewMode;
+  setViewMode(savedViewMode);
   viewModeSelect.addEventListener('change', (event) => {
     setViewMode(event.target.value);
+    closeSidebar();
   });
 
-  const installButton = document.getElementById('install-app');
+  const installButton = document.getElementById('menu-install');
   let deferredPrompt = null;
 
   window.addEventListener('beforeinstallprompt', (event) => {
@@ -648,6 +1242,9 @@ function init() {
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   startInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+  
+  // Mostrar página de contadores por defecto
+  showPage('page-counters');
   
   // Iniciar temporizador si hay contadores
   if (counters.length > 0) {

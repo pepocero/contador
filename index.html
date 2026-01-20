@@ -14,6 +14,69 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+      <div class="sidebar__header">
+        <h2>Menú</h2>
+        <button id="sidebar-close" class="sidebar__close" type="button" aria-label="Cerrar menú">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+      <nav class="sidebar__nav">
+        <button id="menu-counters" class="sidebar__item sidebar__item--active" type="button">
+          <span class="sidebar__icon">📊</span>
+          <span>Mis Contadores</span>
+        </button>
+        <button id="menu-new" class="sidebar__item" type="button">
+          <span class="sidebar__icon">➕</span>
+          <span>Nuevo Contador</span>
+        </button>
+        <button id="menu-stats" class="sidebar__item" type="button">
+          <span class="sidebar__icon">📈</span>
+          <span>Estadísticas</span>
+        </button>
+        <div class="sidebar__divider"></div>
+        <button id="menu-export" class="sidebar__item" type="button">
+          <span class="sidebar__icon">💾</span>
+          <span>Exportar</span>
+        </button>
+        <label for="import-file" class="sidebar__item" style="cursor: pointer;">
+          <span class="sidebar__icon">📥</span>
+          <span>Importar</span>
+          <input type="file" id="import-file" accept=".json" style="display: none;" />
+        </label>
+        <button id="menu-reset-all" class="sidebar__item sidebar__item--danger" type="button">
+          <span class="sidebar__icon">🔄</span>
+          <span>Resetear Todo</span>
+        </button>
+        <div class="sidebar__divider"></div>
+        <label class="sidebar__item sidebar__item--select">
+          <span class="sidebar__icon">👁️</span>
+          <span>Vista</span>
+          <select id="view-mode" class="sidebar__select" aria-label="Seleccionar vista">
+            <option value="flip">Flip Clock</option>
+            <option value="calculator">Calculadora</option>
+            <option value="bolder">Bolder</option>
+          </select>
+        </label>
+        <button id="menu-install" class="sidebar__item" type="button" hidden>
+          <span class="sidebar__icon">📱</span>
+          <span>Instalar App</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Overlay para cerrar sidebar -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Botón hamburguesa -->
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Abrir menú">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
     <main class="app">
       <header class="app__header">
         <div>
@@ -22,26 +85,44 @@
             Crea y gestiona contadores de tiempo transcurrido desde una fecha y hora.
           </p>
         </div>
-        <div class="app__controls">
-          <label class="app__control">
-            <span>Vista</span>
-            <select id="view-mode" aria-label="Seleccionar vista">
-              <option value="flip">Flip Clock</option>
-              <option value="calculator">Calculadora</option>
-              <option value="bolder">Bolder</option>
-            </select>
-          </label>
-          <button id="install-app" class="btn btn--secondary" type="button" hidden>
-            Instalar
-          </button>
-          <button id="reset-all" class="btn btn--danger" type="button">
-            Resetear todo
-          </button>
-        </div>
       </header>
 
-      <section class="panel">
-        <h2>Nuevo contador</h2>
+      <!-- Página de Contadores -->
+      <div id="page-counters" class="page page--active">
+        <section class="panel">
+          <h2>Mis contadores</h2>
+          <div id="counter-list" class="counter-list" aria-live="polite"></div>
+          <p id="empty-state" class="empty-state">
+            Aún no hay contadores. Crea el primero para empezar.
+          </p>
+        </section>
+      </div>
+
+      <!-- Página de Estadísticas -->
+      <div id="page-stats" class="page">
+        <section class="panel">
+          <div class="page-header">
+            <button id="back-to-counters" class="btn btn--secondary" type="button">
+              ← Volver
+            </button>
+            <h2>Estadísticas</h2>
+          </div>
+          <div id="stats-content" class="stats-content"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Modal: Nuevo Contador -->
+    <div id="modal-new" class="modal">
+      <div class="modal__overlay"></div>
+      <div class="modal__content">
+        <div class="modal__header">
+          <h2>Nuevo Contador</h2>
+          <button class="modal__close" type="button" aria-label="Cerrar">
+            <span></span>
+            <span></span>
+          </button>
+        </div>
         <form id="counter-form" class="form">
           <label class="form__field">
             <span>Nombre</span>
@@ -58,18 +139,49 @@
             <span>Fecha y hora de inicio</span>
             <input id="counter-start" type="datetime-local" name="start" required />
           </label>
-          <button class="btn btn--primary" type="submit">Crear contador</button>
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost modal__cancel">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Crear contador</button>
+          </div>
         </form>
-      </section>
+      </div>
+    </div>
 
-      <section class="panel">
-        <h2>Mis contadores</h2>
-        <div id="counter-list" class="counter-list" aria-live="polite"></div>
-        <p id="empty-state" class="empty-state">
-          Aún no hay contadores. Crea el primero para empezar.
-        </p>
-      </section>
-    </main>
+    <!-- Modal: Editar Contador -->
+    <div id="modal-edit" class="modal">
+      <div class="modal__overlay"></div>
+      <div class="modal__content">
+        <div class="modal__header">
+          <h2>Editar Contador</h2>
+          <button class="modal__close" type="button" aria-label="Cerrar">
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+        <form id="edit-counter-form" class="form">
+          <input type="hidden" id="edit-counter-id" />
+          <label class="form__field">
+            <span>Nombre</span>
+            <input
+              id="edit-counter-name"
+              type="text"
+              name="name"
+              placeholder="Ej: Días sin accidentes"
+              maxlength="60"
+              required
+            />
+          </label>
+          <label class="form__field">
+            <span>Fecha y hora de inicio</span>
+            <input id="edit-counter-start" type="datetime-local" name="start" required />
+          </label>
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost modal__cancel">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <template id="counter-template">
       <article class="counter">
@@ -78,6 +190,9 @@
           <div class="counter__time"></div>
         </div>
         <div class="counter__actions">
+          <button class="btn btn--secondary" data-action="edit" type="button">
+            Editar
+          </button>
           <button class="btn btn--secondary" data-action="reset" type="button">
             Reiniciar
           </button>
