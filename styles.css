@@ -45,6 +45,18 @@ body {
   padding: 32px 16px 48px;
 }
 
+@media (max-width: 768px) {
+  body {
+    padding: 20px 12px 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 16px 10px 24px;
+  }
+}
+
 .app {
   max-width: 960px;
   margin: 0 auto;
@@ -81,6 +93,47 @@ body {
   border: 1px solid var(--border);
   background: #fff;
   font-size: 0.95rem;
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  .app__controls {
+    gap: 10px;
+  }
+  
+  .app__control {
+    font-size: 0.8rem;
+    gap: 4px;
+  }
+  
+  .app__control select {
+    padding: 7px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app__controls {
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .app__control {
+    font-size: 0.75rem;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .app__control select {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .app__controls {
+    flex-wrap: nowrap;
+  }
 }
 
 .app__header h1 {
@@ -91,6 +144,26 @@ body {
 .app__subtitle {
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .app__header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .app__subtitle {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app__header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .app__subtitle {
+    font-size: 0.8rem;
+  }
 }
 
 .panel {
@@ -104,6 +177,30 @@ body {
 .panel h2 {
   font-size: 1.2rem;
   margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .panel {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .panel h2 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel {
+    padding: 12px;
+    border-radius: 10px;
+  }
+  
+  .panel h2 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
 }
 
 .form {
@@ -123,11 +220,44 @@ body {
   border: 1px solid var(--border);
   font-size: 1rem;
   background: #fff;
+  touch-action: manipulation;
 }
 
 .form__field input:focus {
   outline: 2px solid rgba(47, 116, 255, 0.35);
   border-color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .form {
+    gap: 14px;
+  }
+  
+  .form__field {
+    gap: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .form__field input {
+    padding: 9px 11px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form {
+    gap: 12px;
+  }
+  
+  .form__field {
+    gap: 5px;
+    font-size: 0.85rem;
+  }
+  
+  .form__field input {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
 }
 
 .btn {
@@ -137,10 +267,25 @@ body {
   font-size: 0.95rem;
   cursor: pointer;
   transition: transform 0.08s ease, background 0.2s ease;
+  touch-action: manipulation;
 }
 
 .btn:active {
   transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .btn {
+    padding: 9px 14px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
 }
 
 .btn--primary {
@@ -201,10 +346,54 @@ body {
 
 .counter__main {
   flex: 1;
+  min-width: 0;
 }
 
 .counter__time {
   margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .counter {
+    padding: 14px;
+    gap: 12px;
+  }
+  
+  .counter__title {
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  
+  .counter__time {
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .counter {
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .counter__title {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  
+  .counter__time {
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .counter {
+    padding: 10px 12px;
+    align-items: flex-start;
+  }
+  
+  .counter__main {
+    flex: 0 1 auto;
+  }
 }
 
 .flip-grid {
@@ -227,10 +416,62 @@ body {
   color: var(--muted);
 }
 
+@media (max-width: 768px) {
+  .flip-grid {
+    gap: 14px;
+  }
+  
+  .flip-label {
+    font-size: 0.7rem;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .flip-grid {
+    grid-template-columns: repeat(6, minmax(70px, 1fr));
+    gap: 8px;
+  }
+  
+  .flip-card {
+    height: 80px;
+  }
+  
+  .flip-card__top,
+  .flip-card__bottom,
+  .flip-card__flip-top,
+  .flip-card__flip-bottom {
+    font-size: 2.8rem;
+  }
+  
+  .flip-card__digit {
+    height: 80px;
+  }
+  
+  .flip-label {
+    font-size: 0.6rem;
+    gap: 4px;
+  }
+  
+  body.view-calculator .flip-card__top,
+  body.view-calculator .flip-card__bottom,
+  body.view-calculator .flip-card__flip-top,
+  body.view-calculator .flip-card__flip-bottom {
+    font-size: 3rem;
+  }
+  
+  body.view-bolder .flip-card__top,
+  body.view-bolder .flip-card__bottom,
+  body.view-bolder .flip-card__flip-top,
+  body.view-bolder .flip-card__flip-bottom {
+    font-size: 2.2rem;
+  }
+}
+
 .flip-card {
   position: relative;
   width: 100%;
-  height: 110px;
+  height: 130px;
   perspective: 900px;
   border-radius: 16px;
   box-shadow: var(--flip-shadow);
@@ -248,7 +489,7 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 3.64rem;
+  font-size: 5rem;
   color: var(--flip-text);
   background: var(--flip-bg);
   border: 1px solid var(--flip-border);
@@ -285,7 +526,7 @@ body.view-calculator .flip-card__flip-bottom {
   box-shadow: none;
   font-family: "Digital", "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.08em;
-  font-size: 3.4rem;
+  font-size: 5.1rem;
 }
 
 body.view-calculator .flip-card__top {
@@ -383,7 +624,7 @@ body.view-bolder .flip-card__top .flip-card__digit {
   top: 0;
   left: 0;
   width: 100%;
-  height: 110px;
+  height: 130px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -442,6 +683,10 @@ body.view-bolder .flip-card__top .flip-card__digit {
     flex-direction: column;
     align-items: flex-start;
   }
+  
+  .app__controls {
+    width: 100%;
+  }
 
   .counter {
     flex-direction: column;
@@ -453,27 +698,115 @@ body.view-bolder .flip-card__top .flip-card__digit {
   }
 
   .flip-grid {
-    grid-template-columns: repeat(3, minmax(110px, 1fr));
+    grid-template-columns: repeat(3, minmax(90px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 720px) and (orientation: landscape) {
+  .counter {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .counter__actions {
+    width: auto;
+    flex-shrink: 0;
   }
 }
 
 @media (max-width: 520px) {
   .flip-grid {
-    grid-template-columns: repeat(2, minmax(110px, 1fr));
+    grid-template-columns: repeat(2, minmax(90px, 1fr));
+    gap: 10px;
   }
 
   .flip-card {
-    height: 92px;
+    height: 110px;
   }
 
   .flip-card__top,
   .flip-card__bottom,
   .flip-card__flip-top,
   .flip-card__flip-bottom {
-    font-size: 2.2rem;
+    font-size: 3.2rem;
   }
 
   .flip-card__digit {
-    height: 92px;
+    height: 110px;
+  }
+  
+  body.view-calculator .flip-card__top,
+  body.view-calculator .flip-card__bottom,
+  body.view-calculator .flip-card__flip-top,
+  body.view-calculator .flip-card__flip-bottom {
+    font-size: 3.5rem;
+  }
+  
+  body.view-bolder .flip-card__top,
+  body.view-bolder .flip-card__bottom,
+  body.view-bolder .flip-card__flip-top,
+  body.view-bolder .flip-card__flip-bottom {
+    font-size: 2.4rem;
+  }
+}
+
+@media (max-width: 520px) and (orientation: landscape) {
+  .flip-grid {
+    grid-template-columns: repeat(6, minmax(60px, 1fr));
+    gap: 6px;
+  }
+  
+  .flip-card {
+    height: 70px;
+  }
+  
+  .flip-card__top,
+  .flip-card__bottom,
+  .flip-card__flip-top,
+  .flip-card__flip-bottom {
+    font-size: 2.2rem;
+  }
+  
+  .flip-card__digit {
+    height: 70px;
+  }
+  
+  .flip-label {
+    font-size: 0.55rem;
+    gap: 3px;
+  }
+  
+  body.view-calculator .flip-card__top,
+  body.view-calculator .flip-card__bottom,
+  body.view-calculator .flip-card__flip-top,
+  body.view-calculator .flip-card__flip-bottom {
+    font-size: 2.4rem;
+  }
+  
+  body.view-bolder .flip-card__top,
+  body.view-bolder .flip-card__bottom,
+  body.view-bolder .flip-card__flip-top,
+  body.view-bolder .flip-card__flip-bottom {
+    font-size: 1.8rem;
+  }
+  
+  .counter {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px;
+  }
+  
+  .counter__main {
+    flex: 0 1 auto;
+  }
+  
+  .counter__actions {
+    width: auto;
+    flex-shrink: 0;
+  }
+  
+  .counter__time {
+    margin-top: 4px;
   }
 }
