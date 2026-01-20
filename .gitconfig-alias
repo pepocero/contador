@@ -1,0 +1,6 @@
+# Alias de git para actualizar versión y hacer push
+# Ejecuta: git config --global include.path .gitconfig-alias
+# O copia estos alias a tu .gitconfig global
+
+[alias]
+    push-updated = !powershell -ExecutionPolicy Bypass -File update-version.ps1 && git add sw.js && git commit -m \"Actualizar versión del Service Worker\" && git push
