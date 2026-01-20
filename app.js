@@ -876,7 +876,7 @@ function openSidebar() {
   const overlay = document.getElementById('sidebar-overlay');
   sidebar.classList.add('sidebar--open');
   overlay.classList.add('sidebar-overlay--visible');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('sidebar-open');
 }
 
 function closeSidebar() {
@@ -884,7 +884,7 @@ function closeSidebar() {
   const overlay = document.getElementById('sidebar-overlay');
   sidebar.classList.remove('sidebar--open');
   overlay.classList.remove('sidebar-overlay--visible');
-  document.body.style.overflow = '';
+  document.body.classList.remove('sidebar-open');
 }
 
 /**
@@ -894,7 +894,7 @@ function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.add('modal--open');
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
   }
 }
 
@@ -902,13 +902,18 @@ function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.remove('modal--open');
-    document.body.style.overflow = '';
+    // Solo quitar la clase si no hay otros modales abiertos
+    const openModals = document.querySelectorAll('.modal.modal--open');
+    if (openModals.length === 0) {
+      document.body.classList.remove('modal-open');
+    }
   }
 }
 
 function closeAllModals() {
   closeModal('modal-new');
   closeModal('modal-edit');
+  document.body.classList.remove('modal-open');
 }
 
 /**
