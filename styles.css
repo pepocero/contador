@@ -514,7 +514,7 @@ body {
   }
   
   .flip-card {
-    height: 95px;
+    height: clamp(85px, 14vh, 110px);
     min-width: 0;
   }
   
@@ -522,11 +522,11 @@ body {
   .flip-card__bottom,
   .flip-card__flip-top,
   .flip-card__flip-bottom {
-    font-size: 3.5rem;
+    font-size: clamp(3rem, 9vw, 5.5rem);
   }
   
   .flip-card__digit {
-    height: 95px;
+    height: 100%;
   }
   
   .flip-label {
@@ -538,21 +538,21 @@ body {
   body.view-calculator .flip-card__bottom,
   body.view-calculator .flip-card__flip-top,
   body.view-calculator .flip-card__flip-bottom {
-    font-size: 3.8rem;
+    font-size: clamp(3.2rem, 9.5vw, 6rem);
   }
   
   body.view-bolder .flip-card__top,
   body.view-bolder .flip-card__bottom,
   body.view-bolder .flip-card__flip-top,
   body.view-bolder .flip-card__flip-bottom {
-    font-size: 2.6rem;
+    font-size: clamp(2.4rem, 7.5vw, 4.5rem);
   }
 }
 
 .flip-card {
   position: relative;
   width: 100%;
-  height: 130px;
+  height: clamp(110px, 15vw, 150px);
   perspective: 900px;
   border-radius: 16px;
   box-shadow: var(--flip-shadow);
@@ -567,16 +567,25 @@ body {
   width: 100%;
   height: 50%;
   display: flex;
-  align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 5rem;
+  font-size: clamp(2.5rem, 8vw, 5rem);
   color: var(--flip-text);
   background: var(--flip-bg);
   border: 1px solid var(--flip-border);
   backface-visibility: hidden;
   overflow: hidden;
   font-variant-numeric: tabular-nums;
+}
+
+.flip-card__top,
+.flip-card__flip-top {
+  align-items: flex-start;
+}
+
+.flip-card__bottom,
+.flip-card__flip-bottom {
+  align-items: flex-end;
 }
 
 .flip-card::before {
@@ -702,19 +711,19 @@ body.view-bolder .flip-card__top .flip-card__digit {
 
 .flip-card__digit {
   position: absolute;
-  top: 0;
   left: 0;
+  top: 0;
   width: 100%;
-  height: 130px;
+  height: 200%;
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  line-height: 200%;
 }
 
 .flip-card__bottom .flip-card__digit,
 .flip-card__flip-bottom .flip-card__digit {
-  transform: translateY(-50%);
+  top: -100%;
 }
 
 .flip-card.is-flipping .flip-card__flip-top {
@@ -819,32 +828,32 @@ body.view-bolder .flip-card__top .flip-card__digit {
   }
 
   .flip-card {
-    height: 130px;
+    height: clamp(120px, 18vw, 160px);
   }
 
   .flip-card__top,
   .flip-card__bottom,
   .flip-card__flip-top,
   .flip-card__flip-bottom {
-    font-size: 4.5rem;
+    font-size: clamp(4rem, 14vw, 7rem);
   }
 
   .flip-card__digit {
-    height: 130px;
+    height: 100%;
   }
   
   body.view-calculator .flip-card__top,
   body.view-calculator .flip-card__bottom,
   body.view-calculator .flip-card__flip-top,
   body.view-calculator .flip-card__flip-bottom {
-    font-size: 4.8rem;
+    font-size: clamp(4.2rem, 15vw, 7.5rem);
   }
   
   body.view-bolder .flip-card__top,
   body.view-bolder .flip-card__bottom,
   body.view-bolder .flip-card__flip-top,
   body.view-bolder .flip-card__flip-bottom {
-    font-size: 3.2rem;
+    font-size: clamp(3rem, 11vw, 5.5rem);
   }
 }
 
@@ -893,7 +902,7 @@ body.view-bolder .flip-card__top .flip-card__digit {
   }
   
   .flip-card {
-    height: 85px;
+    height: clamp(75px, 12vh, 100px);
     min-width: 0;
   }
   
@@ -901,11 +910,11 @@ body.view-bolder .flip-card__top .flip-card__digit {
   .flip-card__bottom,
   .flip-card__flip-top,
   .flip-card__flip-bottom {
-    font-size: 3rem;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
   }
   
   .flip-card__digit {
-    height: 85px;
+    height: 100%;
   }
   
   .flip-label {
@@ -917,13 +926,13 @@ body.view-bolder .flip-card__top .flip-card__digit {
   body.view-calculator .flip-card__bottom,
   body.view-calculator .flip-card__flip-top,
   body.view-calculator .flip-card__flip-bottom {
-    font-size: 3.2rem;
+    font-size: clamp(2.7rem, 8.5vw, 4.8rem);
   }
   
   body.view-bolder .flip-card__top,
   body.view-bolder .flip-card__bottom,
   body.view-bolder .flip-card__flip-top,
   body.view-bolder .flip-card__flip-bottom {
-    font-size: 2.4rem;
+    font-size: clamp(2rem, 7vw, 3.8rem);
   }
 }
