@@ -778,6 +778,7 @@ body.modal-open {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  overflow: visible;
 }
 
 @media (min-width: 769px) {
@@ -875,6 +876,7 @@ body.modal-open {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  overflow: visible;
 }
 
 .flip-unit {
@@ -902,24 +904,40 @@ body.modal-open {
   border-bottom: 2px solid var(--flip-border);
   margin-bottom: -2px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  flex-shrink: 0;
 }
 
 
 @media (max-width: 768px) {
   .flip-grid {
     gap: 14px;
+    overflow: visible;
   }
   
   .flip-label {
-    font-size: 0.65rem;
-    padding: 5px 10px;
+    font-size: 0.7rem;
+    padding: 6px 10px;
     letter-spacing: 0.1em;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    overflow: visible;
+    text-overflow: clip;
+    flex-shrink: 0;
+    min-height: 24px;
+    line-height: 1.2;
   }
   
   .flip-unit {
     gap: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -949,6 +967,7 @@ body.modal-open {
     gap: 6px;
     min-width: 0;
     width: 100%;
+    overflow: visible;
   }
   
   .flip-unit {
@@ -975,10 +994,19 @@ body.modal-open {
     font-size: 0.55rem;
     padding: 4px 8px;
     letter-spacing: 0.08em;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    overflow: visible;
+    text-overflow: clip;
+    flex-shrink: 0;
   }
   
   .flip-unit {
     gap: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
   }
   
   body.view-calculator .flip-card__top,
@@ -1364,6 +1392,7 @@ body.view-bolder .flip-card__top .flip-card__digit {
     gap: 4px;
     min-width: 0;
     width: 100%;
+    overflow: visible;
   }
   
   .flip-unit {
@@ -1390,10 +1419,19 @@ body.view-bolder .flip-card__top .flip-card__digit {
     font-size: 0.5rem;
     padding: 3px 6px;
     letter-spacing: 0.06em;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    overflow: visible;
+    text-overflow: clip;
+    flex-shrink: 0;
   }
   
   .flip-unit {
     gap: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
   }
   
   body.view-calculator .flip-card__top,
