@@ -522,11 +522,11 @@ body {
   .flip-card__bottom,
   .flip-card__flip-top,
   .flip-card__flip-bottom {
-    font-size: clamp(3rem, 9vw, 5.5rem);
+    font-size: clamp(3rem, 11vw, 6.5rem) !important;
   }
   
   .flip-card__digit {
-    height: 100%;
+    height: 200%;
   }
   
   .flip-label {
@@ -538,14 +538,14 @@ body {
   body.view-calculator .flip-card__bottom,
   body.view-calculator .flip-card__flip-top,
   body.view-calculator .flip-card__flip-bottom {
-    font-size: clamp(3.2rem, 9.5vw, 6rem);
+    font-size: clamp(3.2rem, 12vw, 7rem) !important;
   }
   
   body.view-bolder .flip-card__top,
   body.view-bolder .flip-card__bottom,
   body.view-bolder .flip-card__flip-top,
   body.view-bolder .flip-card__flip-bottom {
-    font-size: clamp(2.4rem, 7.5vw, 4.5rem);
+    font-size: clamp(2.4rem, 9vw, 5.5rem) !important;
   }
 }
 
@@ -835,25 +835,25 @@ body.view-bolder .flip-card__top .flip-card__digit {
   .flip-card__bottom,
   .flip-card__flip-top,
   .flip-card__flip-bottom {
-    font-size: clamp(4rem, 14vw, 7rem);
+    font-size: clamp(4rem, 16vw, 8rem) !important;
   }
 
   .flip-card__digit {
-    height: 100%;
+    height: 200%;
   }
   
   body.view-calculator .flip-card__top,
   body.view-calculator .flip-card__bottom,
   body.view-calculator .flip-card__flip-top,
   body.view-calculator .flip-card__flip-bottom {
-    font-size: clamp(4.2rem, 15vw, 7.5rem);
+    font-size: clamp(4.2rem, 17vw, 8.5rem) !important;
   }
   
   body.view-bolder .flip-card__top,
   body.view-bolder .flip-card__bottom,
   body.view-bolder .flip-card__flip-top,
   body.view-bolder .flip-card__flip-bottom {
-    font-size: clamp(3rem, 11vw, 5.5rem);
+    font-size: clamp(3rem, 12vw, 6rem) !important;
   }
 }
 
@@ -910,11 +910,11 @@ body.view-bolder .flip-card__top .flip-card__digit {
   .flip-card__bottom,
   .flip-card__flip-top,
   .flip-card__flip-bottom {
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-size: clamp(2.5rem, 10vw, 5.5rem) !important;
   }
   
   .flip-card__digit {
-    height: 100%;
+    height: 200%;
   }
   
   .flip-label {
@@ -926,13 +926,13 @@ body.view-bolder .flip-card__top .flip-card__digit {
   body.view-calculator .flip-card__bottom,
   body.view-calculator .flip-card__flip-top,
   body.view-calculator .flip-card__flip-bottom {
-    font-size: clamp(2.7rem, 8.5vw, 4.8rem);
+    font-size: clamp(2.7rem, 11vw, 6rem) !important;
   }
   
   body.view-bolder .flip-card__top,
   body.view-bolder .flip-card__bottom,
   body.view-bolder .flip-card__flip-top,
   body.view-bolder .flip-card__flip-bottom {
-    font-size: clamp(2rem, 7vw, 3.8rem);
+    font-size: clamp(2rem, 9vw, 4.5rem) !important;
   }
 }
