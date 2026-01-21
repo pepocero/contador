@@ -463,48 +463,67 @@ function createFlipUnit({ key, label, minDigits }) {
   labelEl.className = 'flip-label';
   labelEl.textContent = label;
 
-  const cardEl = document.createElement('div');
-  cardEl.className = 'flip-card';
-  cardEl.dataset.value = '0'.repeat(minDigits);
+  const counterEl = document.createElement('div');
+  counterEl.className = 'flip-counter';
+  counterEl.dataset.value = '0'.repeat(minDigits);
 
-  const topEl = document.createElement('span');
-  topEl.className = 'flip-card__top';
-  const topDigit = document.createElement('span');
-  topDigit.className = 'flip-card__digit';
-  topDigit.textContent = cardEl.dataset.value;
-  topEl.appendChild(topDigit);
+  // Decorative top
+  const decorTop = document.createElement('span');
+  decorTop.className = 'decor top';
+  
+  // Decorative bottom
+  const decorBottom = document.createElement('span');
+  decorBottom.className = 'decor bottom';
 
-  const bottomEl = document.createElement('span');
-  bottomEl.className = 'flip-card__bottom';
-  const bottomDigit = document.createElement('span');
-  bottomDigit.className = 'flip-card__digit';
-  bottomDigit.textContent = cardEl.dataset.value;
-  bottomEl.appendChild(bottomDigit);
+  // From top (current visible top half)
+  const fromTop = document.createElement('span');
+  fromTop.className = 'from top';
+  const fromTopSpan = document.createElement('span');
+  fromTopSpan.textContent = counterEl.dataset.value;
+  const fromTopShadow = document.createElement('span');
+  fromTopShadow.className = 'shadow';
+  fromTop.appendChild(fromTopSpan);
+  fromTop.appendChild(fromTopShadow);
 
-  const flipEl = document.createElement('span');
-  flipEl.className = 'flip-card__flip';
+  // From bottom (current visible bottom half)
+  const fromBottom = document.createElement('span');
+  fromBottom.className = 'from bottom';
+  const fromBottomSpan = document.createElement('span');
+  fromBottomSpan.textContent = counterEl.dataset.value;
+  const fromBottomShadow = document.createElement('span');
+  fromBottomShadow.className = 'shadow';
+  fromBottom.appendChild(fromBottomSpan);
+  fromBottom.appendChild(fromBottomShadow);
 
-  const flipTop = document.createElement('span');
-  flipTop.className = 'flip-card__flip-top';
-  const flipTopDigit = document.createElement('span');
-  flipTopDigit.className = 'flip-card__digit';
-  flipTopDigit.textContent = cardEl.dataset.value;
-  flipTop.appendChild(flipTopDigit);
+  // To top (next state top half for animation)
+  const toTop = document.createElement('span');
+  toTop.className = 'to top';
+  const toTopSpan = document.createElement('span');
+  toTopSpan.textContent = counterEl.dataset.value;
+  const toTopShadow = document.createElement('span');
+  toTopShadow.className = 'shadow';
+  toTop.appendChild(toTopSpan);
+  toTop.appendChild(toTopShadow);
 
-  const flipBottom = document.createElement('span');
-  flipBottom.className = 'flip-card__flip-bottom';
-  const flipBottomDigit = document.createElement('span');
-  flipBottomDigit.className = 'flip-card__digit';
-  flipBottomDigit.textContent = cardEl.dataset.value;
-  flipBottom.appendChild(flipBottomDigit);
+  // To bottom (next state bottom half for animation)
+  const toBottom = document.createElement('span');
+  toBottom.className = 'to bottom';
+  const toBottomSpan = document.createElement('span');
+  toBottomSpan.textContent = counterEl.dataset.value;
+  const toBottomShadow = document.createElement('span');
+  toBottomShadow.className = 'shadow';
+  toBottom.appendChild(toBottomSpan);
+  toBottom.appendChild(toBottomShadow);
 
-  flipEl.appendChild(flipTop);
-  flipEl.appendChild(flipBottom);
-  cardEl.appendChild(topEl);
-  cardEl.appendChild(bottomEl);
-  cardEl.appendChild(flipEl);
+  counterEl.appendChild(decorTop);
+  counterEl.appendChild(decorBottom);
+  counterEl.appendChild(fromTop);
+  counterEl.appendChild(fromBottom);
+  counterEl.appendChild(toTop);
+  counterEl.appendChild(toBottom);
+
   unitEl.appendChild(labelEl);
-  unitEl.appendChild(cardEl);
+  unitEl.appendChild(counterEl);
 
   return unitEl;
 }
@@ -518,59 +537,62 @@ function buildFlipClock(timeEl) {
   timeEl.appendChild(grid);
 }
 
-function updateFlipCard(cardEl, nextValue) {
-  const currentValue = cardEl.dataset.value;
+function updateFlipCard(counterEl, nextValue) {
+  const currentValue = counterEl.dataset.value || '0';
 
-  if (!cardEl.dataset.initialized) {
-    cardEl.dataset.value = nextValue;
-    cardEl.dataset.initialized = 'true';
-    cardEl.querySelector('.flip-card__top .flip-card__digit').textContent = nextValue;
-    cardEl.querySelector('.flip-card__bottom .flip-card__digit').textContent = nextValue;
-    cardEl.querySelector('.flip-card__flip-top .flip-card__digit').textContent = nextValue;
-    cardEl.querySelector('.flip-card__flip-bottom .flip-card__digit').textContent = nextValue;
+  // Initialize on first call
+  if (!counterEl.dataset.initialized) {
+    counterEl.dataset.value = nextValue;
+    counterEl.dataset.initialized = 'true';
+    // Update all number spans (first child of each from/to element)
+    const allNumberSpans = counterEl.querySelectorAll('.from > span:first-child, .to > span:first-child');
+    allNumberSpans.forEach(span => {
+      span.textContent = nextValue;
+    });
     return;
   }
 
+  // For calculator and bolder views, just update text without animation
+  if (document.body.classList.contains('view-calculator') || document.body.classList.contains('view-bolder')) {
+    counterEl.dataset.value = nextValue;
+    const allNumberSpans = counterEl.querySelectorAll('.from > span:first-child, .to > span:first-child');
+    allNumberSpans.forEach(span => {
+      span.textContent = nextValue;
+    });
+    return;
+  }
+
+  // Skip if value hasn't changed
   if (currentValue === nextValue) {
     return;
   }
 
-  if (document.body.classList.contains('view-calculator') || document.body.classList.contains('view-bolder')) {
-    cardEl.classList.remove('is-flipping');
-    cardEl.dataset.value = nextValue;
-    cardEl.querySelector('.flip-card__top .flip-card__digit').textContent = nextValue;
-    cardEl.querySelector('.flip-card__bottom .flip-card__digit').textContent = nextValue;
-    cardEl.querySelector('.flip-card__flip-top .flip-card__digit').textContent = nextValue;
-    cardEl.querySelector('.flip-card__flip-bottom .flip-card__digit').textContent = nextValue;
-    return;
+  // Update text nodes explicitly to keep top in sync and bottom already on next value
+  const fromTop = counterEl.querySelector('.from.top > span:first-child');
+  const fromBottom = counterEl.querySelector('.from.bottom > span:first-child');
+  const toTop = counterEl.querySelector('.to.top > span:first-child');
+  const toBottom = counterEl.querySelector('.to.bottom > span:first-child');
+  if (fromTop) fromTop.textContent = currentValue;
+  if (fromBottom) fromBottom.textContent = currentValue;
+  if (toTop) toTop.textContent = nextValue;
+  if (toBottom) toBottom.textContent = nextValue;
+
+  // Restart flip animation
+  counterEl.classList.remove('is-flipping');
+  void counterEl.offsetWidth;
+  counterEl.classList.add('is-flipping');
+
+  if (counterEl._flipTimeout) {
+    clearTimeout(counterEl._flipTimeout);
   }
+  counterEl._flipTimeout = setTimeout(() => {
+    counterEl.classList.remove('is-flipping');
+    // After flip, both visible halves should show the new value
+    if (fromTop) fromTop.textContent = nextValue;
+    if (fromBottom) fromBottom.textContent = nextValue;
+  }, 900);
 
-  const topEl = cardEl.querySelector('.flip-card__top .flip-card__digit');
-  const bottomEl = cardEl.querySelector('.flip-card__bottom .flip-card__digit');
-  const flipTopEl = cardEl.querySelector('.flip-card__flip-top');
-  const flipBottomEl = cardEl.querySelector('.flip-card__flip-bottom');
-  const flipTop = flipTopEl.querySelector('.flip-card__digit');
-  const flipBottom = flipBottomEl.querySelector('.flip-card__digit');
-
-  topEl.textContent = currentValue;
-  bottomEl.textContent = currentValue;
-  flipTop.textContent = currentValue;
-  flipBottom.textContent = nextValue;
-
-  cardEl.classList.add('is-flipping');
-
-  const onAnimationEnd = (event) => {
-    if (event.target !== flipBottomEl) {
-      return;
-    }
-    cardEl.classList.remove('is-flipping');
-    topEl.textContent = nextValue;
-    bottomEl.textContent = nextValue;
-    cardEl.dataset.value = nextValue;
-    flipBottomEl.removeEventListener('animationend', onAnimationEnd);
-  };
-
-  flipBottomEl.addEventListener('animationend', onAnimationEnd);
+  counterEl.dataset.value = nextValue;
 }
 
 /**
@@ -647,16 +669,25 @@ function createCounterElement(counter) {
  */
 function updateCounterDisplay(counterEl) {
   const timeEl = counterEl.querySelector('.counter__time');
+  if (!timeEl) {
+    return;
+  }
   const startDate = timeEl.getAttribute('data-start');
+  if (!startDate) {
+    return;
+  }
   const elapsed = calculateElapsedTime(startDate);
   TIME_UNITS.forEach(unit => {
     const unitEl = timeEl.querySelector(`.flip-unit[data-unit="${unit.key}"]`);
     if (!unitEl) {
       return;
     }
-    const cardEl = unitEl.querySelector('.flip-card');
+    const counterEl = unitEl.querySelector('.flip-counter');
+    if (!counterEl) {
+      return;
+    }
     const formatted = formatUnitValue(elapsed[unit.key], unit.minDigits);
-    updateFlipCard(cardEl, formatted);
+    updateFlipCard(counterEl, formatted);
   });
 }
 

@@ -25,7 +25,7 @@ html {
   --flip-bg: #101317;
   --flip-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
   --flip-border: rgba(255, 255, 255, 0.12);
-  --flip-text: #f7f7f9;
+  --flip-text: #000000;
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
@@ -974,20 +974,13 @@ body.modal-open {
     min-width: 0;
   }
   
-  .flip-card {
+  .flip-unit .flip-counter {
     height: clamp(85px, 14vh, 110px);
     min-width: 0;
   }
   
-  .flip-card__top,
-  .flip-card__bottom,
-  .flip-card__flip-top,
-  .flip-card__flip-bottom {
+  .flip-unit .flip-counter > span {
     font-size: clamp(3rem, 11vw, 6.5rem) !important;
-  }
-  
-  .flip-card__digit {
-    height: 200%;
   }
   
   .flip-label {
@@ -1009,227 +1002,282 @@ body.modal-open {
     flex-direction: column;
   }
   
-  body.view-calculator .flip-card__top,
-  body.view-calculator .flip-card__bottom,
-  body.view-calculator .flip-card__flip-top,
-  body.view-calculator .flip-card__flip-bottom {
+  body.view-calculator .flip-unit .flip-counter > span {
     font-size: clamp(3.2rem, 12vw, 7rem) !important;
   }
   
-  body.view-bolder .flip-card__top,
-  body.view-bolder .flip-card__bottom,
-  body.view-bolder .flip-card__flip-top,
-  body.view-bolder .flip-card__flip-bottom {
+  body.view-bolder .flip-unit .flip-counter > span {
     font-size: clamp(2.4rem, 9vw, 5.5rem) !important;
   }
 }
 
-.flip-card {
+/* Flip Counter - Base limpio */
+.flip-unit .flip-counter {
   position: relative;
   width: 100%;
-  height: clamp(110px, 15vw, 150px);
-  perspective: 900px;
+  --flip-h: clamp(6rem, 15vw, 7.5rem);
+  --flip-half: calc(var(--flip-h) / 2);
+  height: var(--flip-h);
+  font-size: 5rem;
+  font-family: 'Oswald', sans-serif;
+  display: inline-block;
+  padding: 0;
+  perspective: 200px;
   border-radius: 0 0 16px 16px;
-  box-shadow: var(--flip-shadow);
   margin-top: 0;
+  overflow: hidden;
+  border: 2px solid #e9e9e9;
+  background: #ffffff;
+  color: #000000;
 }
 
-.flip-card__top,
-.flip-card__bottom,
-.flip-card__flip-top,
-.flip-card__flip-bottom {
+.flip-unit .flip-counter > span {
   position: absolute;
   left: 0;
   width: 100%;
-  height: 50%;
-  display: flex;
-  justify-content: center;
-  font-weight: 800;
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  color: var(--flip-text);
-  background: var(--flip-bg);
-  border: 1px solid var(--flip-border);
-  backface-visibility: hidden;
+  height: var(--flip-half);
   overflow: hidden;
+  padding: 0;
+  text-align: center;
+  background: linear-gradient(#ffffff 0%, #f2f2f2 100%);
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  font-weight: 800;
+  color: #000000;
   font-variant-numeric: tabular-nums;
 }
 
-.flip-card__top,
-.flip-card__flip-top {
-  align-items: flex-start;
-}
-
-.flip-card__bottom,
-.flip-card__flip-bottom {
-  align-items: flex-end;
-}
-
-.flip-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 2px solid #ffffff;
-  border-radius: 16px;
+.flip-unit .flip-counter > span.decor {
+  opacity: 0;
   pointer-events: none;
+}
+
+.flip-unit .flip-counter > span.top {
+  top: 0;
+  border-radius: 12px 12px 0 0;
+  box-shadow: inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.flip-unit .flip-counter > span.bottom {
+  top: var(--flip-half);
+  border-radius: 0 0 12px 12px;
+  box-shadow: inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.flip-unit .flip-counter > span.top > span:first-child,
+.flip-unit .flip-counter > span.bottom > span:first-child {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.flip-unit .flip-counter > span.top > span:first-child {
+  top: 0;
+}
+
+.flip-unit .flip-counter > span.bottom > span:first-child {
+  top: -100%;
+}
+
+.flip-unit .flip-counter > span.from.top {
   z-index: 3;
 }
 
-body.view-calculator .flip-card {
+.flip-unit .flip-counter > span.from.bottom {
+  z-index: 1;
+}
+
+.flip-unit .flip-counter > span.to.top {
+  z-index: 0;
+}
+
+.flip-unit .flip-counter > span.to.bottom {
+  z-index: 2;
+}
+
+/* keep bottom visible; the incoming bottom covers it during flip */
+
+.flip-unit .flip-counter.is-flipping > span.from.top {
+  transform-origin: 50% 100%;
+  animation: flip-top 1.1s;
+}
+
+.flip-unit .flip-counter.is-flipping > span.to.bottom {
+  transform-origin: 50% 0%;
+  animation: flip-bottom 1.1s;
+}
+
+@keyframes flip-top {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(-180deg);
+  }
+}
+
+@keyframes flip-bottom {
+  0% {
+    transform: rotateX(180deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.flip-unit .flip-counter .shadow {
+  display: block;
+  width: 120px;
+  height: 45px;
+  left: -25px;
+  top: -100px !important;
+  overflow: hidden;
+  z-index: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+.flip-unit .flip-counter .top .shadow {
+  background: linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+}
+
+.flip-unit .flip-counter .bottom .shadow {
+  background: linear-gradient(rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+}
+
+.flip-unit .flip-counter .from.top .shadow {
+  animation: fade-out 1s;
+}
+
+.flip-unit .flip-counter .to.bottom .shadow {
+  animation: fade-in 1s;
+}
+
+.flip-unit .flip-counter .hide .shadow {
+  animation: none !important;
+}
+
+.flip-unit .flip-counter .hide {
+  display: none !important;
+}
+
+.flip-unit .flip-counter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid #e9e9e9;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+body.view-calculator .flip-unit .flip-counter {
   background: #0b0f12;
 }
 
-body.view-calculator .flip-card::before {
+body.view-calculator .flip-unit .flip-counter::before {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-body.view-calculator .flip-card__top,
-body.view-calculator .flip-card__bottom,
-body.view-calculator .flip-card__flip-top,
-body.view-calculator .flip-card__flip-bottom {
+body.view-calculator .flip-unit .flip-counter > span {
   background: #0b0f12;
-  color: #8cff9e;
-  border-color: rgba(140, 255, 158, 0.18);
+  color: #f5c400;
   box-shadow: none;
   font-family: "Digital", "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.08em;
   font-size: 5.1rem;
 }
 
-body.view-calculator .flip-card__top {
+body.view-calculator .flip-unit .flip-counter > span span {
+  color: #f5c400;
+  -webkit-text-fill-color: #f5c400;
+}
+
+body.view-calculator .flip-unit .flip-counter .from.top {
   height: 100%;
   border-radius: 0 0 14px 14px;
 }
 
-body.view-calculator .flip-card__bottom,
-body.view-calculator .flip-card__flip,
-body.view-calculator .flip-card__flip-top,
-body.view-calculator .flip-card__flip-bottom {
+body.view-calculator .flip-unit .flip-counter .from.bottom,
+body.view-calculator .flip-unit .flip-counter .to.top,
+body.view-calculator .flip-unit .flip-counter .to.bottom,
+body.view-calculator .flip-unit .flip-counter .decor {
   display: none;
 }
 
-body.view-calculator .flip-card__top .flip-card__digit {
+body.view-calculator .flip-unit .flip-counter .from.top > span:not(.shadow) {
   height: 100%;
   text-shadow: 0 0 12px rgba(140, 255, 158, 0.55);
+  position: relative;
+  bottom: 0;
 }
 
-body.view-bolder .flip-card__top,
-body.view-bolder .flip-card__bottom,
-body.view-bolder .flip-card__flip-top,
-body.view-bolder .flip-card__flip-bottom {
+body.view-bolder .flip-unit .flip-counter > span {
   background: #0d1b2a;
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.18);
   box-shadow: none;
   font-family: "Bolder", "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.04em;
   font-size: 3.4rem;
 }
 
-body.view-bolder .flip-card::before {
+body.view-bolder .flip-unit .flip-counter > span span {
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+}
+
+body.view-bolder .flip-unit .flip-counter::before {
   border-color: rgba(255, 255, 255, 0.6);
 }
 
-body.view-bolder .flip-card__top {
+body.view-bolder .flip-unit .flip-counter .from.top {
   height: 100%;
   border-radius: 0 0 14px 14px;
 }
 
-body.view-bolder .flip-card__bottom,
-body.view-bolder .flip-card__flip,
-body.view-bolder .flip-card__flip-top,
-body.view-bolder .flip-card__flip-bottom {
+body.view-bolder .flip-unit .flip-counter .from.bottom,
+body.view-bolder .flip-unit .flip-counter .to.top,
+body.view-bolder .flip-unit .flip-counter .to.bottom,
+body.view-bolder .flip-unit .flip-counter .decor {
   display: none;
 }
 
-body.view-bolder .flip-card__top .flip-card__digit {
+body.view-bolder .flip-unit .flip-counter .from.top > span:not(.shadow) {
   height: 100%;
-}
-
-.flip-card__top,
-.flip-card__bottom {
-  z-index: 1;
-}
-
-.flip-card__top {
-  top: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px 14px 0 0;
-}
-
-.flip-card__bottom {
+  position: relative;
   bottom: 0;
-  border-top: none;
-  border-radius: 0 0 14px 14px;
 }
 
-.flip-card__flip {
-  position: absolute;
-  inset: 0;
-  perspective: 900px;
-  pointer-events: none;
-  visibility: hidden;
-  z-index: 2;
-}
-
-.flip-card__flip-top {
-  top: 0;
-  transform-origin: bottom;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px 14px 0 0;
-}
-
-.flip-card__flip-bottom {
-  bottom: 0;
-  transform-origin: top;
-  transform: rotateX(90deg);
-  border-radius: 0 0 14px 14px;
-}
-
-.flip-card__digit {
-  position: absolute;
-  left: 0;
-  top: 0;
+.counter > span > span:not(.shadow) {
+  display: inline-block;
   width: 100%;
-  height: 200%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 200%;
-}
-
-.flip-card__bottom .flip-card__digit,
-.flip-card__flip-bottom .flip-card__digit {
-  top: -100%;
-}
-
-.flip-card.is-flipping .flip-card__flip-top {
-  animation: flipTop 0.55s ease-in forwards;
-}
-
-.flip-card.is-flipping .flip-card__flip-bottom {
-  animation: flipBottom 0.55s ease-out forwards;
-}
-
-.flip-card.is-flipping .flip-card__flip {
-  visibility: visible;
-}
-
-@keyframes flipTop {
-  0% {
-    transform: rotateX(0deg);
-  }
-  100% {
-    transform: rotateX(-90deg);
-  }
-}
-
-@keyframes flipBottom {
-  0% {
-    transform: rotateX(90deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
+  text-align: center;
+  line-height: 1;
 }
 
 .counter__actions {
@@ -1324,32 +1372,19 @@ body.view-bolder .flip-card__top .flip-card__digit {
     gap: 10px;
   }
 
-  .flip-card {
+  .flip-unit .flip-counter {
     height: clamp(120px, 18vw, 160px);
   }
 
-  .flip-card__top,
-  .flip-card__bottom,
-  .flip-card__flip-top,
-  .flip-card__flip-bottom {
+  .flip-unit .flip-counter > span {
     font-size: clamp(4rem, 16vw, 8rem) !important;
   }
 
-  .flip-card__digit {
-    height: 200%;
-  }
-  
-  body.view-calculator .flip-card__top,
-  body.view-calculator .flip-card__bottom,
-  body.view-calculator .flip-card__flip-top,
-  body.view-calculator .flip-card__flip-bottom {
+  body.view-calculator .flip-unit .flip-counter > span {
     font-size: clamp(4.2rem, 17vw, 8.5rem) !important;
   }
   
-  body.view-bolder .flip-card__top,
-  body.view-bolder .flip-card__bottom,
-  body.view-bolder .flip-card__flip-top,
-  body.view-bolder .flip-card__flip-bottom {
+  body.view-bolder .flip-unit .flip-counter > span {
     font-size: clamp(3rem, 12vw, 6rem) !important;
   }
 }
@@ -1399,20 +1434,13 @@ body.view-bolder .flip-card__top .flip-card__digit {
     min-width: 0;
   }
   
-  .flip-card {
+  .flip-unit .flip-counter {
     height: clamp(75px, 12vh, 100px);
     min-width: 0;
   }
   
-  .flip-card__top,
-  .flip-card__bottom,
-  .flip-card__flip-top,
-  .flip-card__flip-bottom {
+  .flip-unit .flip-counter > span {
     font-size: clamp(2.5rem, 10vw, 5.5rem) !important;
-  }
-  
-  .flip-card__digit {
-    height: 200%;
   }
   
   .flip-label {
@@ -1434,17 +1462,11 @@ body.view-bolder .flip-card__top .flip-card__digit {
     flex-direction: column;
   }
   
-  body.view-calculator .flip-card__top,
-  body.view-calculator .flip-card__bottom,
-  body.view-calculator .flip-card__flip-top,
-  body.view-calculator .flip-card__flip-bottom {
+  body.view-calculator .flip-unit .flip-counter > span {
     font-size: clamp(2.7rem, 11vw, 6rem) !important;
   }
   
-  body.view-bolder .flip-card__top,
-  body.view-bolder .flip-card__bottom,
-  body.view-bolder .flip-card__flip-top,
-  body.view-bolder .flip-card__flip-bottom {
+  body.view-bolder .flip-unit .flip-counter > span {
     font-size: clamp(2rem, 9vw, 4.5rem) !important;
   }
 }
