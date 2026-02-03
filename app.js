@@ -419,6 +419,20 @@ function loadPalette() {
   }
 }
 
+function applyCounterPalette(counterEl, palette) {
+  const normalized = palette || 'default';
+  if (normalized === 'default') {
+    counterEl.removeAttribute('data-theme');
+  } else {
+    counterEl.dataset.theme = normalized;
+  }
+}
+
+function applyCounterView(counterEl, viewMode) {
+  const normalized = viewMode === 'calculator' || viewMode === 'bolder' ? viewMode : 'flip';
+  counterEl.dataset.view = normalized;
+}
+
 /**
  * Calcula el tiempo transcurrido desde una fecha
  * @param {string} startDate - Fecha de inicio en formato ISO
@@ -668,12 +682,8 @@ function createCounterElement(counter) {
   
   const counterEl = clone.querySelector('.counter');
   counterEl.setAttribute('data-id', counter.id);
-  counterEl.dataset.view = counter.viewMode || 'flip';
-  if (counter.palette && counter.palette !== 'default') {
-    counterEl.dataset.theme = counter.palette;
-  } else {
-    counterEl.removeAttribute('data-theme');
-  }
+  applyCounterView(counterEl, counter.viewMode);
+  applyCounterPalette(counterEl, counter.palette);
   
   const titleEl = clone.querySelector('.counter__title');
   const startDate = new Date(counter.startDate);
@@ -696,23 +706,23 @@ function createCounterElement(counter) {
   const paletteSelect = clone.querySelector('[data-control="palette"]');
   if (viewSelect) {
     viewSelect.value = counter.viewMode || 'flip';
-    viewSelect.addEventListener('change', (event) => {
+    const onViewChange = (event) => {
       counter.viewMode = event.target.value;
-      counterEl.dataset.view = counter.viewMode;
+      applyCounterView(counterEl, counter.viewMode);
       saveCounters();
-    });
+    };
+    viewSelect.addEventListener('change', onViewChange);
+    viewSelect.addEventListener('input', onViewChange);
   }
   if (paletteSelect) {
     paletteSelect.value = counter.palette || 'default';
-    paletteSelect.addEventListener('change', (event) => {
+    const onPaletteChange = (event) => {
       counter.palette = event.target.value;
-      if (counter.palette === 'default') {
-        counterEl.removeAttribute('data-theme');
-      } else {
-        counterEl.dataset.theme = counter.palette;
-      }
+      applyCounterPalette(counterEl, counter.palette);
       saveCounters();
-    });
+    };
+    paletteSelect.addEventListener('change', onPaletteChange);
+    paletteSelect.addEventListener('input', onPaletteChange);
   }
   
   // Botones de acción
@@ -1144,6 +1154,13 @@ function saveEditCounter(counterId, name, startDate, isReverse) {
 function init() {
   // Cargar contadores desde LocalStorage
   loadCounters();
+  // Limpiar paleta global antigua (ahora es por contador)
+  document.body.removeAttribute('data-theme');
+  try {
+    localStorage.removeItem(PALETTE_KEY);
+  } catch (error) {
+    console.warn('No se pudo limpiar la paleta global:', error);
+  }
   
   // Renderizar contadores
   renderCounters();
