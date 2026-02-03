@@ -787,12 +787,17 @@ function updateCounterDisplay(counterEl) {
 function renderCounters() {
   const container = document.getElementById('counter-list');
   const emptyState = document.getElementById('empty-state');
+  const dots = document.getElementById('counter-dots');
   
   // Limpiar contenedor
   container.innerHTML = '';
   
   if (counters.length === 0) {
     emptyState.style.display = 'block';
+    if (dots) {
+      dots.innerHTML = '';
+      dots.style.display = 'none';
+    }
     return;
   }
   
@@ -806,9 +811,124 @@ function renderCounters() {
   
   // Actualizar todos los contadores inmediatamente
   updateAllCounters();
+  setupCounterSlider();
   
   // Actualizar estadísticas
   renderStatistics();
+}
+
+function setupCounterSlider() {
+  const container = document.getElementById('counter-list');
+  const dots = document.getElementById('counter-dots');
+  if (!container || !dots) {
+    return;
+  }
+
+  if (container._sliderCleanup) {
+    container._sliderCleanup();
+    container._sliderCleanup = null;
+  }
+
+  const cards = Array.from(container.querySelectorAll('.counter'));
+  dots.innerHTML = '';
+  if (cards.length <= 1) {
+    dots.style.display = 'none';
+    return;
+  }
+
+  dots.style.display = 'flex';
+
+  cards.forEach((card, index) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'counter-dot';
+    dot.setAttribute('aria-label', `Ir al contador ${index + 1}`);
+    dot.addEventListener('click', () => {
+      card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    });
+    dots.appendChild(dot);
+  });
+
+  const setActive = () => {
+    const containerRect = container.getBoundingClientRect();
+    let activeIndex = 0;
+    let minDistance = Infinity;
+    cards.forEach((card, index) => {
+      const rect = card.getBoundingClientRect();
+      const distance = Math.abs(rect.left - containerRect.left);
+      if (distance < minDistance) {
+        minDistance = distance;
+        activeIndex = index;
+      }
+    });
+    dots.querySelectorAll('.counter-dot').forEach((dot, idx) => {
+      dot.classList.toggle('is-active', idx === activeIndex);
+    });
+  };
+
+  let raf = 0;
+  const onScroll = () => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(setActive);
+  };
+  const onResize = () => setActive();
+
+  container.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onResize);
+
+  setActive();
+
+  container._sliderCleanup = () => {
+    container.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onResize);
+    if (container._dragCleanup) {
+      container._dragCleanup();
+      container._dragCleanup = null;
+    }
+  };
+
+  // Enable mouse drag scrolling on desktop
+  let isDragging = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  const onMouseDown = (event) => {
+    if (event.button !== 0) return;
+    isDragging = true;
+    startX = event.pageX - container.offsetLeft;
+    scrollLeft = container.scrollLeft;
+    container.classList.add('is-dragging');
+  };
+
+  const onMouseMove = (event) => {
+    if (!isDragging) return;
+    event.preventDefault();
+    const x = event.pageX - container.offsetLeft;
+    const walk = (x - startX);
+    container.scrollLeft = scrollLeft - walk;
+  };
+
+  const onMouseUp = () => {
+    isDragging = false;
+    container.classList.remove('is-dragging');
+  };
+
+  const onMouseLeave = () => {
+    isDragging = false;
+    container.classList.remove('is-dragging');
+  };
+
+  container.addEventListener('mousedown', onMouseDown);
+  container.addEventListener('mousemove', onMouseMove);
+  container.addEventListener('mouseup', onMouseUp);
+  container.addEventListener('mouseleave', onMouseLeave);
+
+  container._dragCleanup = () => {
+    container.removeEventListener('mousedown', onMouseDown);
+    container.removeEventListener('mousemove', onMouseMove);
+    container.removeEventListener('mouseup', onMouseUp);
+    container.removeEventListener('mouseleave', onMouseLeave);
+  };
 }
 
 /**

@@ -913,6 +913,30 @@ body.modal-open {
   gap: 16px;
 }
 
+.counter-dots {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.counter-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.counter-dot.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: scale(1.3);
+  box-shadow: 0 0 0 3px rgba(47, 116, 255, 0.2);
+}
+
 .counter {
   padding: 16px;
   border-radius: 14px;
@@ -1028,6 +1052,33 @@ body.modal-open {
     width: 100%;
     margin-top: 4px;
   }
+
+  .counter__controls {
+    grid-template-columns: 1fr;
+  }
+
+  .counter-list {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+  }
+
+  .counter-list.is-dragging {
+    cursor: grabbing;
+  }
+
+  .counter {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+
+  .counter-dots {
+    display: flex;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1054,6 +1105,25 @@ body.modal-open {
   .counter__actions {
     width: 100%;
     margin-top: 4px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .counter-list {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    padding-bottom: 8px;
+  }
+
+  .counter {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+
+  .counter-dots {
+    display: flex;
   }
 }
 
