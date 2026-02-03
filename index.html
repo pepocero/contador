@@ -51,15 +51,7 @@
           <span>Resetear Todo</span>
         </button>
         <div class="sidebar__divider"></div>
-        <label class="sidebar__item sidebar__item--select">
-          <span class="sidebar__icon">👁️</span>
-          <span>Vista</span>
-          <select id="view-mode" class="sidebar__select" aria-label="Seleccionar vista">
-            <option value="flip">Flip Clock</option>
-            <option value="calculator">Calculadora</option>
-            <option value="bolder">Bolder</option>
-          </select>
-        </label>
+        <div class="sidebar__divider"></div>
         <button id="menu-install" class="sidebar__item" type="button" hidden>
           <span class="sidebar__icon">📱</span>
           <span>Instalar App</span>
@@ -144,6 +136,30 @@
             <button type="submit" class="btn btn--primary">Crear contador</button>
           </div>
         </form>
+        <div class="modal__divider"></div>
+        <h3 class="modal__subtitle">Cuenta regresiva</h3>
+        <p class="form__note">La fecha objetivo debe ser futura.</p>
+        <form id="counter-form-reverse" class="form form--secondary">
+          <label class="form__field">
+            <span>Nombre</span>
+            <input
+              id="counter-reverse-name"
+              type="text"
+              name="name"
+              placeholder="Ej: Navidad"
+              maxlength="60"
+              required
+            />
+          </label>
+          <label class="form__field">
+            <span>Fecha Objetivo</span>
+            <input id="counter-reverse-target" type="datetime-local" name="target" required />
+          </label>
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost modal__cancel">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Crear cuenta regresiva</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -175,6 +191,10 @@
             <span>Fecha y hora de inicio</span>
             <input id="edit-counter-start" type="datetime-local" name="start" required />
           </label>
+          <label class="form__field">
+            <span>Cuenta regresiva</span>
+            <input id="edit-counter-reverse" type="checkbox" name="reverse" />
+          </label>
           <div class="modal__actions">
             <button type="button" class="btn btn--ghost modal__cancel">Cancelar</button>
             <button type="submit" class="btn btn--primary">Guardar cambios</button>
@@ -187,6 +207,26 @@
       <article class="counter">
         <div class="counter__main">
           <h3 class="counter__title"></h3>
+          <div class="counter__controls">
+            <label class="counter__control">
+              <span>Vista</span>
+              <select class="counter__select" data-control="view" aria-label="Vista del contador">
+                <option value="flip">Flip Clock</option>
+                <option value="calculator">Calculadora</option>
+                <option value="bolder">Bolder</option>
+              </select>
+            </label>
+            <label class="counter__control">
+              <span>Paleta</span>
+              <select class="counter__select" data-control="palette" aria-label="Paleta del contador">
+                <option value="default">Clásica</option>
+                <option value="ocean">Océano</option>
+                <option value="sunset">Atardecer</option>
+                <option value="forest">Bosque</option>
+                <option value="midnight">Medianoche</option>
+              </select>
+            </label>
+          </div>
           <div class="counter__time"></div>
         </div>
         <div class="counter__actions">

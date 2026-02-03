@@ -6,6 +6,7 @@
 // Clave para LocalStorage
 const STORAGE_KEY = 'counters_app_data';
 const VIEW_MODE_KEY = 'counters_view_mode';
+const PALETTE_KEY = 'counters_palette_mode';
 
 // Estado global de la aplicación
 let counters = [];
@@ -37,6 +38,15 @@ function loadCounters() {
         }
         if (!counter.createdAt) {
           counter.createdAt = new Date().toISOString();
+        }
+        if (typeof counter.isReverse !== 'boolean') {
+          counter.isReverse = false;
+        }
+        if (!counter.viewMode) {
+          counter.viewMode = 'flip';
+        }
+        if (!counter.palette) {
+          counter.palette = 'default';
         }
         return counter;
       });
@@ -108,6 +118,7 @@ function importCounters(file) {
           if (!counter.resetHistory) counter.resetHistory = [];
           if (!counter.originalStartDate) counter.originalStartDate = counter.startDate;
           if (!counter.createdAt) counter.createdAt = new Date().toISOString();
+          if (typeof counter.isReverse !== 'boolean') counter.isReverse = false;
           return counter;
         });
       } else {
@@ -117,6 +128,7 @@ function importCounters(file) {
           if (!counter.resetHistory) counter.resetHistory = [];
           if (!counter.originalStartDate) counter.originalStartDate = counter.startDate;
           if (!counter.createdAt) counter.createdAt = new Date().toISOString();
+          if (typeof counter.isReverse !== 'boolean') counter.isReverse = false;
           counters.push(counter);
         });
       }
@@ -384,16 +396,36 @@ function loadViewMode() {
   }
 }
 
+function setPalette(mode) {
+  const normalized = mode || 'default';
+  if (normalized === 'default') {
+    document.body.removeAttribute('data-theme');
+  } else {
+    document.body.setAttribute('data-theme', normalized);
+  }
+  try {
+    localStorage.setItem(PALETTE_KEY, normalized);
+  } catch (error) {
+    console.error('Error al guardar la paleta:', error);
+  }
+}
+
+function loadPalette() {
+  try {
+    return localStorage.getItem(PALETTE_KEY) || 'default';
+  } catch (error) {
+    console.error('Error al cargar la paleta:', error);
+    return 'default';
+  }
+}
+
 /**
  * Calcula el tiempo transcurrido desde una fecha
  * @param {string} startDate - Fecha de inicio en formato ISO
  * @returns {Object} Objeto con días, horas, minutos y segundos
  */
-function calculateElapsedTime(startDate) {
-  const start = new Date(startDate);
-  const now = new Date();
-
-  if (now < start) {
+function calculateTimeDifference(start, end) {
+  if (end < start) {
     return { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
   }
 
@@ -405,8 +437,8 @@ function calculateElapsedTime(startDate) {
   const startSeconds = start.getSeconds();
   const startMilliseconds = start.getMilliseconds();
 
-  let years = now.getFullYear() - startYear;
-  let months = now.getMonth() - startMonth;
+  let years = end.getFullYear() - startYear;
+  let months = end.getMonth() - startMonth;
 
   if (months < 0) {
     years -= 1;
@@ -428,7 +460,7 @@ function calculateElapsedTime(startDate) {
   };
 
   let anchor = buildClampedDate(startYear + years, startMonth + months);
-  while (anchor > now) {
+  while (anchor > end) {
     months -= 1;
     if (months < 0) {
       years -= 1;
@@ -437,7 +469,7 @@ function calculateElapsedTime(startDate) {
     anchor = buildClampedDate(startYear + years, startMonth + months);
   }
 
-  const diffMs = now - anchor;
+  const diffMs = end - anchor;
   let totalSeconds = Math.floor(diffMs / 1000);
   const days = Math.floor(totalSeconds / 86400);
   totalSeconds -= days * 86400;
@@ -447,6 +479,18 @@ function calculateElapsedTime(startDate) {
   const seconds = totalSeconds - minutes * 60;
 
   return { years, months, days, hours, minutes, seconds };
+}
+
+function calculateElapsedTime(startDate) {
+  const start = new Date(startDate);
+  const now = new Date();
+  return calculateTimeDifference(start, now);
+}
+
+function calculateRemainingTime(targetDate) {
+  const now = new Date();
+  const target = new Date(targetDate);
+  return calculateTimeDifference(now, target);
 }
 
 function formatUnitValue(value, minDigits) {
@@ -553,7 +597,9 @@ function updateFlipCard(counterEl, nextValue) {
   }
 
   // For calculator and bolder views, just update text without animation
-  if (document.body.classList.contains('view-calculator') || document.body.classList.contains('view-bolder')) {
+  const hostCounter = counterEl.closest('.counter');
+  const viewMode = hostCounter ? hostCounter.dataset.view : 'flip';
+  if (viewMode === 'calculator' || viewMode === 'bolder') {
     counterEl.dataset.value = nextValue;
     const allNumberSpans = counterEl.querySelectorAll('.from > span:first-child, .to > span:first-child');
     allNumberSpans.forEach(span => {
@@ -622,6 +668,12 @@ function createCounterElement(counter) {
   
   const counterEl = clone.querySelector('.counter');
   counterEl.setAttribute('data-id', counter.id);
+  counterEl.dataset.view = counter.viewMode || 'flip';
+  if (counter.palette && counter.palette !== 'default') {
+    counterEl.dataset.theme = counter.palette;
+  } else {
+    counterEl.removeAttribute('data-theme');
+  }
   
   const titleEl = clone.querySelector('.counter__title');
   const startDate = new Date(counter.startDate);
@@ -632,11 +684,36 @@ function createCounterElement(counter) {
     hour: '2-digit',
     minute: '2-digit'
   });
-  titleEl.textContent = `${counter.name} (${formattedDate})`;
+  const modeLabel = counter.isReverse ? 'Cuenta regresiva hasta' : 'Desde';
+  titleEl.textContent = `${counter.name} (${modeLabel}: ${formattedDate})`;
   
   const timeEl = clone.querySelector('.counter__time');
   timeEl.setAttribute('data-start', counter.startDate);
+  timeEl.setAttribute('data-direction', counter.isReverse ? 'reverse' : 'forward');
   buildFlipClock(timeEl);
+
+  const viewSelect = clone.querySelector('[data-control="view"]');
+  const paletteSelect = clone.querySelector('[data-control="palette"]');
+  if (viewSelect) {
+    viewSelect.value = counter.viewMode || 'flip';
+    viewSelect.addEventListener('change', (event) => {
+      counter.viewMode = event.target.value;
+      counterEl.dataset.view = counter.viewMode;
+      saveCounters();
+    });
+  }
+  if (paletteSelect) {
+    paletteSelect.value = counter.palette || 'default';
+    paletteSelect.addEventListener('change', (event) => {
+      counter.palette = event.target.value;
+      if (counter.palette === 'default') {
+        counterEl.removeAttribute('data-theme');
+      } else {
+        counterEl.dataset.theme = counter.palette;
+      }
+      saveCounters();
+    });
+  }
   
   // Botones de acción
   const editBtn = clone.querySelector('[data-action="edit"]');
@@ -676,7 +753,10 @@ function updateCounterDisplay(counterEl) {
   if (!startDate) {
     return;
   }
-  const elapsed = calculateElapsedTime(startDate);
+  const direction = timeEl.getAttribute('data-direction');
+  const elapsed = direction === 'reverse'
+    ? calculateRemainingTime(startDate)
+    : calculateElapsedTime(startDate);
   TIME_UNITS.forEach(unit => {
     const unitEl = timeEl.querySelector(`.flip-unit[data-unit="${unit.key}"]`);
     if (!unitEl) {
@@ -760,14 +840,17 @@ function stopUpdateTimer() {
  * @param {string} name - Nombre del contador
  * @param {string} startDate - Fecha de inicio en formato ISO
  */
-function createCounter(name, startDate) {
+function createCounter(name, startDate, isReverse) {
   const newCounter = {
     id: Date.now().toString(),
     name: name.trim(),
     startDate: startDate,
     createdAt: new Date().toISOString(),
     resetHistory: [],
-    originalStartDate: startDate
+    originalStartDate: startDate,
+    isReverse: Boolean(isReverse),
+    viewMode: 'flip',
+    palette: 'default'
   };
   
   counters.push(newCounter);
@@ -884,8 +967,8 @@ function handleFormSubmit(event) {
     alert('Por favor, completa todos los campos.');
     return;
   }
-  
-  createCounter(name, startDate);
+
+  createCounter(name, startDate, false);
   
   // Limpiar formulario y restablecer fecha por defecto
   nameInput.value = '';
@@ -896,6 +979,40 @@ function handleFormSubmit(event) {
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   startInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+  nameInput.focus();
+}
+
+function handleReverseFormSubmit(event) {
+  event.preventDefault();
+
+  const nameInput = document.getElementById('counter-reverse-name');
+  const targetInput = document.getElementById('counter-reverse-target');
+
+  const name = nameInput.value.trim();
+  const targetDate = targetInput.value;
+
+  if (!name || !targetDate) {
+    alert('Por favor, completa todos los campos.');
+    return;
+  }
+
+  const target = new Date(targetDate);
+  if (Number.isNaN(target.getTime()) || target <= new Date()) {
+    alert('La fecha objetivo para la cuenta regresiva debe ser futura.');
+    return;
+  }
+
+  createCounter(name, targetDate, true);
+
+  nameInput.value = '';
+  const now = new Date();
+  now.setDate(now.getDate() + 1);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  targetInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
   nameInput.focus();
 }
 
@@ -996,6 +1113,10 @@ function editCounter(counterId) {
   const hours = String(startDate.getHours()).padStart(2, '0');
   const minutes = String(startDate.getMinutes()).padStart(2, '0');
   document.getElementById('edit-counter-start').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+  const reverseInput = document.getElementById('edit-counter-reverse');
+  if (reverseInput) {
+    reverseInput.checked = Boolean(counter.isReverse);
+  }
   
   openModal('modal-edit');
 }
@@ -1003,12 +1124,13 @@ function editCounter(counterId) {
 /**
  * Guardar cambios de edición
  */
-function saveEditCounter(counterId, name, startDate) {
+function saveEditCounter(counterId, name, startDate, isReverse) {
   const counter = counters.find(c => c.id === counterId);
   if (!counter) return;
   
   counter.name = name.trim();
   counter.startDate = startDate;
+  counter.isReverse = Boolean(isReverse);
   
   saveCounters();
   renderCounters();
@@ -1086,6 +1208,14 @@ function init() {
     handleFormSubmit(e);
     closeModal('modal-new');
   });
+  const reverseForm = document.getElementById('counter-form-reverse');
+  if (reverseForm) {
+    reverseForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleReverseFormSubmit(e);
+      closeModal('modal-new');
+    });
+  }
   
   // Configurar formulario de editar contador
   const editForm = document.getElementById('edit-counter-form');
@@ -1094,7 +1224,16 @@ function init() {
     const counterId = document.getElementById('edit-counter-id').value;
     const name = document.getElementById('edit-counter-name').value;
     const startDate = document.getElementById('edit-counter-start').value;
-    saveEditCounter(counterId, name, startDate);
+    const reverseInput = document.getElementById('edit-counter-reverse');
+    const isReverse = reverseInput ? reverseInput.checked : false;
+    if (isReverse) {
+      const target = new Date(startDate);
+      if (Number.isNaN(target.getTime()) || target <= new Date()) {
+        alert('La fecha objetivo para la cuenta regresiva debe ser futura.');
+        return;
+      }
+    }
+    saveEditCounter(counterId, name, startDate, isReverse);
   });
   
   // Cerrar modales
@@ -1157,15 +1296,7 @@ function init() {
     closeSidebar();
   });
 
-  // Configurar selector de vista en sidebar
-  const viewModeSelect = document.getElementById('view-mode');
-  const savedViewMode = localStorage.getItem(VIEW_MODE_KEY) || 'flip';
-  viewModeSelect.value = savedViewMode;
-  setViewMode(savedViewMode);
-  viewModeSelect.addEventListener('change', (event) => {
-    setViewMode(event.target.value);
-    closeSidebar();
-  });
+  // Selectores de vista/paleta ahora son por contador
 
   const installButton = document.getElementById('menu-install');
   let deferredPrompt = null;
@@ -1198,6 +1329,9 @@ function init() {
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
+      if (window.location.protocol === 'file:') {
+        return;
+      }
       // Leer versión del service worker para cache-busting
       let swVersion = '?v=' + Date.now();
       try {
