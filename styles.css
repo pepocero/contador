@@ -735,6 +735,25 @@ body.modal-open {
   font-size: 0.95rem;
 }
 
+.app__footer {
+  margin-top: 8px;
+  padding: 16px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.app__footer a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.app__footer a:hover,
+.app__footer a:focus-visible {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .app__header h1 {
     font-size: 1.6rem;
@@ -742,6 +761,10 @@ body.modal-open {
   
   .app__subtitle {
     font-size: 0.85rem;
+  }
+
+  .app__footer {
+    font-size: 0.8rem;
   }
 }
 
@@ -752,6 +775,10 @@ body.modal-open {
   
   .app__subtitle {
     font-size: 0.8rem;
+  }
+
+  .app__footer {
+    font-size: 0.75rem;
   }
 }
 
